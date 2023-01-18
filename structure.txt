@@ -1,0 +1,18 @@
+package
+    chess gameplay subpackage
+        chess py
+            board (8 x 8 np.array containing info about what pieces are where)
+            piece (class outlining how each piece can move and what it is worth)
+            history  (1 x 3 array containing information about previous move: piece name, where it was, and where it went)
+    chess mover subpackage
+        prelim checks  (Am I in check?, is mate imminent?, is unequal exchance imminent?)
+        earlygame
+        midgame
+        endgame
+pytests
+
+
+pieces:
+pawn,Bishop,Queen: Hansen
+Knight,rook,king:Henry
+
