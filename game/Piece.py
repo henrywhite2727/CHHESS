@@ -18,6 +18,12 @@ class Pawn(Piece):
         super().__init__(position, colour, active)
         self.value = 1
 
+    def __str__(self):
+        if self.colour:
+            return "P"
+        else:
+            return "p"
+
     def find_legal_moves(self) -> list[tuple]:
         x, y = self.position[0], self.position[1]
         if self.colour == 0:
