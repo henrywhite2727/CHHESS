@@ -1,5 +1,4 @@
 import Piece
-import Sequence
 
 
 class Square:
@@ -12,6 +11,51 @@ class Square:
             return "-"
         else:
             return str(self.piece)
+
+
+class Sequence:
+    def __init__(self, mode: str = "SAN") -> None:
+        if mode != "SAN":
+            if mode == "LAN":
+                pass
+            elif mode == "PGN":
+                pass
+            else:
+                raise ValueError("Invalid game sequence notation.")
+        self.sequence = []
+        self.moves = 0
+
+    def __str__(self):
+        string = ""
+        for i in range(len(self.sequence)):
+            string += str(i) + ". " + str(self.sequence[i]) + " "
+
+
+class Event:
+    def __init__(
+        self, depart: Square, arrive: Square, disam: int = 0, mode: str = "SAN"
+    ) -> None:
+        # Assume legal moves by the power of Piece
+        self.depart = depart
+        self.arrive = arrive
+        self.capture = False
+        if self.arrive.piece is not None:
+            self.capture = True
+        self.disam = disam
+        self.mode = mode
+
+    def __str__(self):
+        string = str(self.depart.piece)
+        if self.disam == 1:
+            string += pos_to_str(self.depart.position)[0]
+        elif self.disam == 2:
+            string += self.depart.position[1]
+        elif self.disam == 3:
+            string += pos_to_str(self.depart.position)
+        if self.capture:
+            string += "x"
+        string += pos_to_str(self.arrive.position)
+        return string
 
 
 class Board:
@@ -59,6 +103,8 @@ class Board:
         string += "   a b c d e f g h"
         return string
 
+
+"""
     def move(self, initial, final, piece, event, string):
         if event is None:
             if string is None:
@@ -75,8 +121,7 @@ class Board:
         make event 
         add to sequence 
         move(event)
-        
-
+"""
 
 
 def pos_to_str(position: tuple) -> str:

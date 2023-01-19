@@ -1,7 +1,14 @@
 from . import Board
-from . import Sequence
 from . import Piece
 
 
 def move():
-    pass
+    """
+    get user input
+    confirm it's legal
+    create Event in Sequence
+    move on Board
+    solver/other user's turn
+    loop
+
+    """
