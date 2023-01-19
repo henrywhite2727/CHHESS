@@ -1,5 +1,5 @@
 import pytest
-from ..game import Board
+from CHHESS.Chess import Board
 
 
 def test_pos_to_str():

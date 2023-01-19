@@ -1,5 +1,3 @@
-# from . import Piece
-# from . import Sequence
 import Piece
 import Sequence
 

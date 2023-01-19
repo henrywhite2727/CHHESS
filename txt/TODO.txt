@@ -1,0 +1,6 @@
+en passant
+castling
+promotion
+draws
+forfeits
+clock?
