@@ -1,10 +1,6 @@
-# Colour is a bool for now: 0 for white, 1 for black
-# Position is a tuple for now: letter first, then numberFF
-
-
 class Piece:
     def __init__(self, position: tuple, colour: bool, active: bool = True) -> None:
-        if ord(position[0]) < ord("a") or ord(position[0]) > ord("h"):
+        if position[0] < 1 or position[0] > 8 or position[1] < 1 or position[1] > 8:
             raise ValueError("Piece must have coordinates between a1 and h8.")
         self.position = position
         self.colour = colour
@@ -22,7 +18,7 @@ class Pawn(Piece):
         super().__init__(position, colour, active)
         self.value = 1
 
-    def find_legal_moves(self) -> list(tuple):
+    def find_legal_moves(self) -> list[tuple]:
         x, y = self.position[0], self.position[1]
         if self.colour == 0:
             if y < 8:
@@ -59,10 +55,27 @@ class Knight(Piece):
         return super().find_legal_moves()
 
 
-"""
-        [('a',1),('b',1)]
-
-
-henry = King(('d',1), 0, True, 10)
-moves = henry.find_legal_moves()
-"""
+def get_legal_moves(self, possible_moves: list[tuple]):
+    """This function checks the possible moves and sorts through them and removes illegal moves. The two criteria it looks for
+    are:
+    1. Trying to move a piece to a position not on the board
+    2. Trying to move a piece onto a square where your team already has a piece
+    Args:
+        possible_moves (list of tuples): list of all possible moves a piece can do
+    Returns:
+        legal_moves: list of tuples with subset of possible moves that are legal
+    """
+    legal_moves = []
+    for move in possible_moves:
+        # checking if move is within board
+        if (
+            self.position[0] < 8
+            and self.position[1] < 8
+            and self.position[0] > 0
+            and self.position[1] > 0
+        ):
+            # Checking if square is already occupied by a piece on your team
+            for p in pieces:
+                if p.colour == self.colour and p.position != move:
+                    legal_moves.extend(move)
+    return legal_moves
