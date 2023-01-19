@@ -1,0 +1,22 @@
+position: tuple
+    position[0]: int = x-coordinate
+        1 = a
+        2 = b
+        3 = c
+        4 = d
+        5 = e 
+        6 = f 
+        7 = g 
+        8 = h 
+    position[1]: int = y-coordinate
+
+colour: bool
+    False = white
+    True = black
+
+value: int = value of piece
+    1 = pawn
+    3 = bishop or knight 
+    5 = rook 
+    9 = queen 
+    10 = king (not legally defined to be 10 but this might be useful)
