@@ -18,9 +18,9 @@ class Piece:
 
 
 class Pawn(Piece):
-    def __init__(self, position: tuple, colour: bool, active: bool) -> None:
+    value=1
+    def __init__(self, position: tuple, colour: bool, active: bool=True) -> None:
         super().__init__(position, colour, active)
-        self.value = 1
 
     def __str__(self):
         if self.colour:

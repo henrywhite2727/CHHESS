@@ -61,7 +61,22 @@ class Board:
         string += "   a b c d e f g h"
         return string
 
-    def move(self) -> Board:
+    def move(self, initial, final, piece, event, string):
+        if event is None:
+            if string is None:
+                event = Event(from, to, piece)
+                self.sequence.addEvents(event)
+                move(event)
+        else:
+            if piece doesnt match raise KeyErrorelse:
+                    self.board[]
+    
+    def move_by_user():
+        ask for input
+        check if error 
+        make event 
+        add to sequence 
+        move(event)
         
 
 
