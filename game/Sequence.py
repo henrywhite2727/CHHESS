@@ -3,6 +3,6 @@ class Sequence:
         pass
 
 
-class Move:
+class Event:
     def __init__(self) -> None:
         pass

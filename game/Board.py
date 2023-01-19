@@ -61,6 +61,10 @@ class Board:
         string += "   a b c d e f g h"
         return string
 
+    def move(self) -> Board:
+        
+
+
 
 def pos_to_str(position: tuple) -> str:
     if position[0] < 1 or position[0] > 8 or position[1] < 1 or position[1] > 8:

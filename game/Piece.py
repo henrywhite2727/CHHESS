@@ -7,10 +7,14 @@ class Piece:
         self.active = active
 
     def __str__(self) -> str:
-        return "implement me"
+        return NotImplementedError(
+            "This Piece's class __str__ has not been implemented"
+        )
 
     def find_legal_moves(self) -> list:
-        raise NotImplementedError("Please implement me")
+        raise NotImplementedError(
+            "This Piece's class find_legal_moves has not been implemented"
+        )
 
 
 class Pawn(Piece):
