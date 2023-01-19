@@ -61,9 +61,7 @@ class Board:
         string += "   a b c d e f g h"
         return string
 
-    def move(self) -> Board:
-        
-
+    # def move(self) -> Board:
 
 
 def pos_to_str(position: tuple) -> str:
