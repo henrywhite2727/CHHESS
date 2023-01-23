@@ -123,8 +123,27 @@ class Board:
         move(event)
 """
 
+# These functions make it seem like we should write a Position class but it
+# seems extra
 
-def pos_to_str(position: tuple) -> str:
+
+def pos_to_str(position: tuple[int]) -> str:
+    """Takes a position tuple and returns it in string representation.
+
+    Example:
+    > square = Square((1,1))
+    > print(Board.pos_to_str(square.position))
+    >> a1
+
+    Args:
+        position (tuple[int]): Two coordinate int elements from 1 to 8
+
+    Raises:
+        ValueError: If position is out of bounds
+
+    Returns:
+        str: String representation of coordinate position
+    """
     if position[0] < 1 or position[0] > 8 or position[1] < 1 or position[1] > 8:
         raise ValueError(
             "Invalid position value ("
@@ -134,3 +153,26 @@ def pos_to_str(position: tuple) -> str:
             + ")."
         )
     return chr(position[0] + ord("a") - 1) + str(position[1])
+
+
+def str_to_pos(pos: str) -> tuple[int]:
+    """Takes a position string and returns it in int representation.
+
+    Example:
+    > square = Square(Board.str_to_pos("b2"))
+    > print(square.position)
+    >> (2, 2)
+
+    Args:
+        pos (str): String representation of position
+
+    Raises:
+        ValueError: If position is invalid
+
+    Returns:
+        tuple[int]: Integer representation of position (see standards.txt)
+    """
+    x, y = int(ord(pos[0]) - ord("a")) + 1, int(pos[1])
+    if len(pos) != 2 or x < 1 or x > 8 or y < 1 or y > 8:
+        raise ValueError("Invalid position string " + pos + ".")
+    return (x, y)
