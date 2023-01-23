@@ -21,6 +21,16 @@ value: int = value of piece
     9 = queen 
     10 = king (not legally defined to be 10 but this might be useful)
 
+piece representation:
+    lowercase = white
+    uppercase = black
+    p = pawn
+    b = bishop
+    n = knight 
+    r = rook
+    q = queen
+    k = king 
+
 disam: int = level of disambiguity required
     0 = none 
     1 = file of departure

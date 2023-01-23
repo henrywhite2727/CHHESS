@@ -1,4 +1,4 @@
-import Piece
+from . import Piece
 
 
 class Square:
@@ -15,13 +15,15 @@ class Square:
 
 class Sequence:
     def __init__(self, mode: str = "SAN") -> None:
+        # TODO Initialize from input
         if mode != "SAN":
             if mode == "LAN":
                 pass
             elif mode == "PGN":
                 pass
             else:
-                raise ValueError("Invalid game sequence notation.")
+                raise ValueError("Invalid game notation standard.")
+        self.mode = mode
         self.sequence = []
         self.moves = 0
 
@@ -33,7 +35,7 @@ class Sequence:
 
 class Event:
     def __init__(
-        self, depart: Square, arrive: Square, disam: int = 0, mode: str = "SAN"
+        self, depart: Square, arrive: Square, mode: str = "SAN", disam: int = 0
     ) -> None:
         # Assume legal moves by the power of Piece
         self.depart = depart
@@ -89,6 +91,8 @@ class Board:
                 self.board[7][j].piece = Piece.Bishop((j + 1, 8), False, True)
             self.board[7][3].piece = Piece.Queen((4, 8), False, True)
             self.board[7][4].piece = Piece.King((5, 8), False, True)
+
+            self.captured: list[list[Piece.Piece]] = [[], []]
         else:
             "Implement creating board from sequence"
             self.board: list[list[Square]] = []
@@ -103,28 +107,63 @@ class Board:
         string += "   a b c d e f g h"
         return string
 
+    def move(self, event: Event) -> None:
+        # TODO Implement string interpretation?
+        # TODO I want this to return itself [Hansen]
+        # Assume legal moves by the power of Piece
+        if event.capture:
+            if event.arrive.piece.colour:
+                self.captured[1].append(event.arrive.piece)
+            else:
+                self.captured[0].append(event.arrive.piece)
+        pos_d = pos_to_ind(event.depart.position)
+        pos_a = pos_to_ind(event.arrive.position)
+        self.board[pos_d[0]][pos_d[1]].piece = None
+        self.board[pos_a[0]][pos_a[1]].piece = event.depart.piece
 
-"""
-    def move(self, initial, final, piece, event, string):
-        if event is None:
-            if string is None:
-                event = Event(from, to, piece)
-                self.sequence.addEvents(event)
-                move(event)
-        else:
-            if piece doesnt match raise KeyErrorelse:
-                    self.board[]
-    
-    def move_by_user():
-        ask for input
-        check if error 
-        make event 
-        add to sequence 
-        move(event)
-"""
 
 # These functions make it seem like we should write a Position class but it
 # seems extra
+
+
+def pos_to_ind(position: tuple[int]) -> tuple[int]:
+    """Takes a position tuple and returns it in its indices on the Board.
+
+    Args:
+        position (tuple[int]): position in coordinate form
+
+    Raises:
+        ValueError: If position is out of bounds
+
+    Returns:
+        tuple[int]: position on Board object
+    """
+    if (
+        len(position) > 2
+        or position[0] < 1
+        or position[0] > 8
+        or position[1] < 1
+        or position[1] > 8
+    ):
+        raise ValueError("Invalid position value " + str(position))
+    return (position[1] - 1, position[0] - 1)
+
+
+def ind_to_pos(index: tuple[int]) -> tuple[int]:
+    """Takes a position as indexed on the Board and returns it in coordinate form.
+
+    Args:
+        index (tuple[int]): position on Board object
+
+    Raises:
+        ValueError: If position is out of bounds
+
+    Returns:
+        tuple[int]: position in coordinate form
+    """
+    if len(index) > 2 or index[0] < 1 or index[0] > 8 or index[1] < 1 or index[1] > 8:
+        raise ValueError("Invalid position value " + str(index))
+    return (index[1] + 1, index[0] + 1)
 
 
 def pos_to_str(position: tuple[int]) -> str:
@@ -144,14 +183,14 @@ def pos_to_str(position: tuple[int]) -> str:
     Returns:
         str: String representation of coordinate position
     """
-    if position[0] < 1 or position[0] > 8 or position[1] < 1 or position[1] > 8:
-        raise ValueError(
-            "Invalid position value ("
-            + str(position[0])
-            + ", "
-            + str(position[1])
-            + ")."
-        )
+    if (
+        len(position) > 2
+        or position[0] < 1
+        or position[0] > 8
+        or position[1] < 1
+        or position[1] > 8
+    ):
+        raise ValueError("Invalid position value " + str(position))
     return chr(position[0] + ord("a") - 1) + str(position[1])
 
 
