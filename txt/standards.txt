@@ -36,3 +36,14 @@ disam: int = level of disambiguity required
     1 = file of departure
     2 = rank of departure
     3 = both file and rank
+
+Position mode: int = mode of initiation
+    0 = Board index
+        i.e. (1, 3)
+    1 = tuple[int, int]
+        i.e. (4, 2)
+    2 = tuple[str, int]
+        i.e. ("d", 2)
+    3 = str
+        i.e. "d2"
+    

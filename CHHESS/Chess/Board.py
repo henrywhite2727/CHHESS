@@ -1,3 +1,4 @@
+from typing import Union
 from . import Piece
 
 
@@ -13,30 +14,11 @@ class Square:
             return str(self.piece)
 
 
-class Sequence:
-    def __init__(self, mode: str = "SAN") -> None:
-        # TODO Initialize from input
-        if mode != "SAN":
-            if mode == "LAN":
-                pass
-            elif mode == "PGN":
-                pass
-            else:
-                raise ValueError("Invalid game notation standard.")
-        self.mode = mode
-        self.sequence = []
-        self.moves = 0
-
-    def __str__(self):
-        string = ""
-        for i in range(len(self.sequence)):
-            string += str(i) + ". " + str(self.sequence[i]) + " "
-
-
 class Event:
     def __init__(
         self, depart: Square, arrive: Square, mode: str = "SAN", disam: int = 0
     ) -> None:
+        # TODO implement other notations
         # Assume legal moves by the power of Piece
         self.depart = depart
         self.arrive = arrive
@@ -58,6 +40,29 @@ class Event:
             string += "x"
         string += pos_to_str(self.arrive.position)
         return string
+
+
+class Sequence:
+    def __init__(self, mode: str = "SAN") -> None:
+        # TODO Initialize from input
+        if mode != "SAN":
+            if mode == "LAN":
+                pass
+            elif mode == "PGN":
+                pass
+            else:
+                raise ValueError("Invalid game notation standard.")
+        self.mode = mode
+        self.sequence = []
+        self.moves = 0
+
+    def __str__(self):
+        string = ""
+        for i in range(len(self.sequence)):
+            string += str(i) + ". " + str(self.sequence[i]) + " "
+
+    def add_event(self, event: Event):
+        self.sequence.append(event)
 
 
 class Board:
@@ -122,96 +127,81 @@ class Board:
         self.board[pos_a[0]][pos_a[1]].piece = event.depart.piece
 
 
-# These functions make it seem like we should write a Position class but it
-# seems extra
+class Position:
+    def __init__(
+        self, position: Union[tuple[int], tuple[str, int], str], mode: int = 0
+    ) -> None:
+        match mode:
+            case 0:
+                self.file = position[1] + 1
+                self.rank = position[0] + 1
+            case 1:
+                self.file = position[0]
+                self.rank = position[1]
+            case 2:
+                self.file = ord(position[0]) - ord("a")
+                self.rank = position[1]
+            case 3:
+                self.file = ord(position[0]) - ord("a") + 1
+                self.rank = ord(position[1]) - ord("1") + 1
+            case _:
+                raise ValueError("Invalid mode for position initialization.")
+        if self.file < 1 or self.file > 8 or self.rank < 0 or self.rank > 8:
+            raise ValueError(
+                "Position (" + self.file + ", " + self.rank + ") out of bounds."
+            )
 
+    def __str__(self) -> str:
+        return chr(self.file + ord("a") - 1) + str(self.rank)
 
-def pos_to_ind(position: tuple[int]) -> tuple[int]:
-    """Takes a position tuple and returns it in its indices on the Board.
+    def index(self) -> tuple[int]:
+        """Returns Position object as indices on the Board.
 
-    Args:
-        position (tuple[int]): position in coordinate form
+        Returns:
+            tuple[int]: position in Board index form
+        """
+        return (self.rank - 1, self.file - 1)
 
-    Raises:
-        ValueError: If position is out of bounds
+    def ind_to_pos(index: tuple[int]) -> tuple[int]:
+        """Takes a position as indexed on the Board and returns it in coordinate form.
 
-    Returns:
-        tuple[int]: position on Board object
-    """
-    if (
-        len(position) > 2
-        or position[0] < 1
-        or position[0] > 8
-        or position[1] < 1
-        or position[1] > 8
-    ):
-        raise ValueError("Invalid position value " + str(position))
-    return (position[1] - 1, position[0] - 1)
+        Args:
+            index (tuple[int]): position on Board object
 
+        Raises:
+            ValueError: If position is out of bounds
 
-def ind_to_pos(index: tuple[int]) -> tuple[int]:
-    """Takes a position as indexed on the Board and returns it in coordinate form.
+        Returns:
+            tuple[int]: position in coordinate form
+        """
+        if (
+            len(index) > 2
+            or index[0] < 1
+            or index[0] > 8
+            or index[1] < 1
+            or index[1] > 8
+        ):
+            raise ValueError("Invalid position value " + str(index))
+        return (index[1] + 1, index[0] + 1)
 
-    Args:
-        index (tuple[int]): position on Board object
+    def str_to_pos(pos: str) -> tuple[int]:
+        """Takes a position string and returns it in int representation.
 
-    Raises:
-        ValueError: If position is out of bounds
+        Example:
+        > square = Square(Board.str_to_pos("b2"))
+        > print(square.position)
+        >> (2, 2)
 
-    Returns:
-        tuple[int]: position in coordinate form
-    """
-    if len(index) > 2 or index[0] < 1 or index[0] > 8 or index[1] < 1 or index[1] > 8:
-        raise ValueError("Invalid position value " + str(index))
-    return (index[1] + 1, index[0] + 1)
+        Args:
+            pos (str): String representation of position
 
+        Raises:
+            ValueError: If position is invalid
 
-def pos_to_str(position: tuple[int]) -> str:
-    """Takes a position tuple and returns it in string representation.
-
-    Example:
-    > square = Square((1,1))
-    > print(Board.pos_to_str(square.position))
-    >> a1
-
-    Args:
-        position (tuple[int]): Two coordinate int elements from 1 to 8
-
-    Raises:
-        ValueError: If position is out of bounds
-
-    Returns:
-        str: String representation of coordinate position
-    """
-    if (
-        len(position) > 2
-        or position[0] < 1
-        or position[0] > 8
-        or position[1] < 1
-        or position[1] > 8
-    ):
-        raise ValueError("Invalid position value " + str(position))
-    return chr(position[0] + ord("a") - 1) + str(position[1])
-
-
-def str_to_pos(pos: str) -> tuple[int]:
-    """Takes a position string and returns it in int representation.
-
-    Example:
-    > square = Square(Board.str_to_pos("b2"))
-    > print(square.position)
-    >> (2, 2)
-
-    Args:
-        pos (str): String representation of position
-
-    Raises:
-        ValueError: If position is invalid
-
-    Returns:
-        tuple[int]: Integer representation of position (see standards.txt)
-    """
-    x, y = int(ord(pos[0]) - ord("a")) + 1, int(pos[1])
-    if len(pos) != 2 or x < 1 or x > 8 or y < 1 or y > 8:
-        raise ValueError("Invalid position string " + pos + ".")
-    return (x, y)
+        Returns:
+            tuple[int]: Integer representation of position (see standards.txt)
+        """
+        x, y = int(ord(pos[0]) - ord("a")) + 1, int(pos[1])
+        if len(pos) != 2 or x < 1 or x > 8 or y < 1 or y > 8:
+            raise ValueError("Invalid position string " + pos + ".")
+        return (x, y)
