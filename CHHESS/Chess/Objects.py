@@ -1,5 +1,4 @@
 from typing import Union
-from . import Piece
 
 
 class Position:
@@ -15,7 +14,7 @@ class Position:
     def __init__(
         self, position: Union[tuple[int], tuple[str, int], str], mode: int = 0
     ) -> None:
-        """Initiates a Position object.
+        """Initializes a Position object.
 
         Args:
             position (Union[tuple[int], tuple[str, int], str]): Coordinates.
@@ -72,8 +71,6 @@ class Position:
 
 class Piece:
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
-        if position[0] < 1 or position[0] > 8 or position[1] < 1 or position[1] > 8:
-            raise ValueError("Piece must have coordinates between a1 and h8.")
         self.position = position
         self.colour = colour
         self.active = active
@@ -92,50 +89,120 @@ class Piece:
 class Pawn(Piece):
     value = 1
 
-    def __init__(self, position: tuple, colour: bool, active: bool = True) -> None:
+    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+        """Initializes Pawn object.
+
+        Args:
+            position (Position): Position of piece on board.
+            colour (bool): Colour of piece.
+            active (bool, optional): If the piece is on the board. Defaults to True.
+        """
         super().__init__(position, colour, active)
 
-    def __str__(self):
-        if self.colour:
-            return "P"
-        else:
-            return "p"
+    def __str__(self) -> str:
+        """Returns representation of Pawn as a string.
 
-    def find_legal_moves(self) -> list[tuple]:
-        x, y = self.position[0], self.position[1]
-        if self.colour == 0:
-            if y < 8:
-                if x == "a":
-                    return [("b", y + 1)]
-                elif x == "h":
-                    return [("g", y + 1)]
-                else:
-                    return [(chr(ord(x) - 1), y + 1, chr(ord(x) + 1), y + 1)]
-            else:
-                raise ValueError("Pawn cannot be active on highest rank.")
-        else:
-            if y > 8:
-                if x == "a":
-                    return [("b", y - 1)]
-                elif x == "h":
-                    return [("g", y - 1)]
-                else:
-                    return [(chr(ord(x) - 1), y + 1, chr(ord(x) + 1), y + 1)]
-            else:
-                raise ValueError("Pawn cannot be active on highest rank.")
+        Returns:
+            str: String representation of pawn.
+        """
+        return "P" if self.colour else "p"
+
+    def possible_moves(self) -> list[Position]:
+        """Returns all possible moves for this Pawn.
+
+        Returns:
+            list[Position]: Every advancing position possible for this pawn, this move.
+        """
+        moves = []
+
+        # Beginning pawn can advance up to two ranks
+        if (not self.colour and self.position.rank == 2) or (
+            self.colour and self.position.rank == 7
+        ):
+            moves.append(
+                Position(
+                    (
+                        self.position.file,
+                        self.position.rank + (-2 if self.colour else 2),
+                    ),
+                    mode=1,
+                )
+            )
+
+        files = range(
+            max(1, self.position.file - 1), min(8, self.position.file + 1) + 1
+        )
+        for file in files:
+            moves.append(
+                Position(
+                    (file, self.position.rank + (-1 if self.colour else 1)), mode=1
+                )
+            )
+        return moves
 
     def promote(self):
-        "implement me"
         pass
 
 
 class Knight(Piece):
-    def __init__(self, position: tuple, colour: bool, active: bool, value: int):
-        super().__init__(position, colour, active)
-        self.value = value
+    value = 3
 
-    def find_legal_moves(self):
-        return super().find_legal_moves()
+    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+        """Initializes Knight object.
+
+        Args:
+            position (Position): Position of piece on board.
+            colour (bool): Colour of piece.
+            active (bool, optional): If the piece is on the board. Defaults to True.
+        """
+        super().__init__(position, colour, active)
+
+    def __str__(self) -> str:
+        """Returns representation of Knight as a string.
+
+        Returns:
+            str: String representation of knight.
+        """
+        return "N" if self.colour else "n"
+
+    def possible_moves(self) -> list[Position]:
+        """Returns all possible moves for this Knight.
+
+        Returns:
+            list[Position]: Every advancing position possible for this knight, this move.
+        """
+        moves = []
+
+        wide = [
+            [self.position.file - 2, self.position.file + 2],
+            [self.position.rank - 1, self.position.rank + 1],
+        ]
+        tall = [
+            [self.position.file - 1, self.position.file + 1],
+            [self.position.rank - 2, self.position.rank + 2],
+        ]
+
+        for i in (0, 1):
+            for j in (0, 1):
+                if wide[i][j] < 1 or wide[i][j] > 8:
+                    wide[i].pop(j)
+                if tall[i][j] < 1 or tall[i][j] > 8:
+                    tall[i].pop(j)
+
+        for file in wide[0]:
+            for rank in wide[1]:
+                moves.append(Position((file, rank), mode=1))
+        for file in tall[0]:
+            for rank in tall[1]:
+                moves.append(Position((file, rank), mode=1))
+
+        return moves
+
+
+knight = Knight(Position("d8", mode=3), False)
+moves = knight.possible_moves()
+for move in moves:
+    print(move)
 
 
 class Square:
@@ -146,7 +213,7 @@ class Square:
         piece (Piece): Piece object on the Square, if any. None if none.
     """
 
-    def __init__(self, position: Position, piece: Piece.Piece = None) -> None:
+    def __init__(self, position: Position, piece: Piece = None) -> None:
         """Initializes a Square object.
 
         Args:
