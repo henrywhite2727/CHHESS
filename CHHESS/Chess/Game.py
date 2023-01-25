@@ -6,17 +6,107 @@ class Lawyer:
     pass
 
 
-def legal_moves(
-    possible_moves: list[Objects.Position], board: Objects.Board
+def legal_moves(piece: Objects.Piece, board: Objects.Board) -> list[Objects.Square]:
+    moves = piece.possible_moves()
+    for i in range(len(moves)):
+        i_move = moves[i].index()
+        colour_i = board.board[i_move[0]][i_move[1]].piece.colour
+        if (board.colour and colour_i) or (not board.colour and not colour_i):
+            moves.pop(i)
+    return moves
+
+
+def legal_moves_pawn(
+    piece: Objects.Piece, board: Objects.Board
 ) -> list[Objects.Square]:
-    moves = []
-    for move in possible_moves:
-        pass
+    pass
 
 
-board = Objects.Board()
+def legal_moves_knight(
+    piece: Objects.Piece, board: Objects.Board
+) -> list[Objects.Square]:
+    pass
+
+
+def legal_moves_bishop(
+    piece: Objects.Piece, board: Objects.Board
+) -> list[Objects.Square]:
+    pass
+
+
+def legal_moves_rook(
+    piece: Objects.Piece, board: Objects.Board
+) -> list[Objects.Square]:
+    pass
+
+
+def legal_moves_queen(
+    piece: Objects.Piece, board: Objects.Board
+) -> list[Objects.Square]:
+    pass
+
+
+def legal_moves_king(
+    piece: Objects.Piece, board: Objects.Board
+) -> list[Objects.Square]:
+    pass
+
+
+def play():
+    pass
+
+
+def turn():
+    pass
+
+
+def check_check(board: Objects.Board) -> bool:
+    """Returns True if the board is in a checked state.
+
+    Args:
+        board (Objects.Board): The current board.
+
+    Returns:
+        bool: Whether or not the current player is in check.
+    """
+    # Check every one of opponent's legal moves for King
+    for piece in board.active[0 if board.colour else 1]:
+        for move in legal_moves(piece, board):
+            if isinstance(move.piece, Objects.King) and (
+                (move.piece.colour and board.colour)
+                or (not move.piece.colour and not board.colour)
+            ):
+                return True
+    return False
+
+
+def check_mate(board: Objects.Board) -> bool:
+    """Returns True if the board is in a checkmate state.
+
+    Args:
+        board (Objects.Board): The current board.
+
+    Returns:
+        bool: Whether or not the current player is in checkmate.
+    """
+    for piece in board.active[1 if board.colour else 0]:
+        if (
+            isinstance(piece, Objects.King)
+            and (
+                (piece.colour and board.colour)
+                or (not piece.colour and not board.colour)
+            )
+            and len(legal_moves(piece.possible_moves(), board)) == 0
+        ):
+            return True
+    return False
+
+
+board = Objects.Board(notate=True)
+piece = board.active[0][15]
 print(board)
-
+print(check_check(board))
+print(check_mate(board))
 
 # def move():
 #     """

@@ -453,13 +453,32 @@ class Board:
     """Representation of a chess board.
 
     Variables:
-        board (list[list[Square]]): 8x8 2D list of Square objects, representing the board.
+        board (list[list[Square]]): 8x8 2D list of Square objects, representing
+        the board.
+        active (list[list[Piece]]): 2x1 list of Piece objects, representing
+            active pieces. The 1st index refers to white pieces, the 2nd
+            refers to black.
         captured (list[list[Piece]]): 2x1 list of Piece objects, representing
-            captured pieces. The 1st index refers to white pieces, the 2nd refers to black.
+            captured pieces. The 1st index refers to white pieces, the 2nd
+            refers to black.
+        colour (bool): Colour corresponding to the player who moves next.
+        notate (bool): Toggles algebraic notation display.
     """
 
-    def __init__(self, sequence: Sequence = None) -> None:
+    def __init__(self, sequence: Sequence = None, notate: bool = False) -> None:
         if sequence is None:
+            # Initialize empty list of active pieces
+            self.active: list[list[Piece]] = [[], []]
+
+            # Initialize empty list of captured pieces
+            self.captured: list[list[Piece]] = [[], []]
+
+            # White begins
+            self.colour = False
+
+            # Default no notation
+            self.notate = notate
+
             # Initialize empty board
             self.board: list[list[Square]] = [
                 [Square(Position((file, rank))) for rank in range(8)]
@@ -470,29 +489,57 @@ class Board:
             for colour in (False, True):
                 for file in range(8):
                     rank = 6 if colour else 1
-                    self.board[rank][file].piece = Pawn(Position((file, rank)), colour)
+                    i_c = 1 if colour else 0
+                    self.active[i_c].append(Pawn(Position((rank, file)), colour))
+                    self.board[rank][file].piece = self.active[i_c][-1]
                 rank = 7 if colour else 0
                 for file in (0, 7):
-                    self.board[rank][file].piece = Rook((file, rank), colour)
+                    self.active[i_c].append(Rook(Position((rank, file)), colour))
+                    self.board[rank][file].piece = self.active[i_c][-1]
                 for file in (1, 6):
-                    self.board[rank][file].piece = Knight((file, rank), colour)
+                    self.active[i_c].append(Knight(Position((rank, file)), colour))
+                    self.board[rank][file].piece = self.active[i_c][-1]
                 for file in (2, 5):
-                    self.board[rank][file].piece = Bishop((file, rank), colour)
-                self.board[rank][3].piece = Queen((file, rank), colour)
-                self.board[rank][4].piece = King((file, rank), colour)
-
-            # Initialize empty list of captured pieces
-            self.captured: list[list[Piece]] = [[], []]
+                    self.active[i_c].append(Bishop(Position((rank, file)), colour))
+                    self.board[rank][file].piece = self.active[i_c][-1]
+                self.active[i_c].append(Queen(Position((rank, 3)), colour))
+                self.board[rank][3].piece = self.active[i_c][-1]
+                self.active[i_c].append(King(Position((rank, 4)), colour))
+                self.board[rank][4].piece = self.active[i_c][-1]
         else:
             # TODO Implement creating board from sequence
             pass
 
     def __str__(self) -> str:
-        string = "   _________________\n"
-        for i in range(len(self.board) - 1, -1, -1):
-            string += str(i + 1) + " | "
-            for j in range(len(self.board[i])):
-                string += str(self.board[i][j]) + " "
-            string += "|\n"
-        string += "   ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n    a b c d e f g h"
+        string = ""
+        if self.colour:
+            if self.notate:
+                string += "  h g f e d c b a\n"
+            string += " _________________\n"
+            for i in range(len(self.board)):
+                string += "| "
+                for j in range(len(self.board) - 1, -1, -1):
+                    string += str(self.board[i][j]) + " "
+                string += "| "
+                if self.notate:
+                    string += str(i + 1)
+                string += "\n"
+            string += " ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾"
+
+        else:
+            if self.notate:
+                string += "  "
+            string += " _________________\n"
+            for i in range(len(self.board) - 1, -1, -1):
+                if self.notate:
+                    string += str(i + 1) + " "
+                string += "| "
+                for j in range(len(self.board[i])):
+                    string += str(self.board[i][j]) + " "
+                string += "|\n"
+            if self.notate:
+                string += "  "
+            string += " ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾"
+            if self.notate:
+                string += "\n    a b c d e f g h"
         return string
