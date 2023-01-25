@@ -1,11 +1,34 @@
-Square
-    position
-    piece
-Sequence
-    mode
-    sequence
-    moves
-Event
-Board
+Objects
+    Position
+        file (int)
+        rank (int)
+    Square
+        position (Position)
+        piece (Piece)
+    Board
+        board (list[list[Square]])
+        captured (list[list[Piece]])
+    Event 
+        depart (Square)
+        arrive (Square)
+        capture (bool)
+        mode (str)
+        disam (int)
+    Sequence
+        sequence (list[Event])
+        moves (int)
+    Piece (abstract)
+        position (Position)
+        colour (bool)
+        active (bool)
+    Pawn (Piece)
+    Knight (Piece)
+    Bishop (Piece)
+    Rook (Piece)
+    Queen (Piece)
+    King (Piece)
 
-position
+Game 
+    Lawyer 
+    Mover 
+
