@@ -199,10 +199,173 @@ class Knight(Piece):
         return moves
 
 
-knight = Knight(Position("d8", mode=3), False)
-moves = knight.possible_moves()
-for move in moves:
-    print(move)
+class Bishop(Piece):
+    value = 3
+
+    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+        """Initializes Bishop object.
+
+        Args:
+            position (Position): Position of piece on board.
+            colour (bool): Colour of piece.
+            active (bool, optional): If the piece is on the board. Defaults to True.
+        """
+        super().__init__(position, colour, active)
+
+    def __str__(self) -> str:
+        """Returns representation of Bishop as a string.
+
+        Returns:
+            str: String representation of bishop.
+        """
+        return "B" if self.colour else "b"
+
+    def possible_moves(self) -> list[Position]:
+        """Returns all possible moves for this Bishop.
+
+        Returns:
+            list[Position]: Every advancing position possible for this bishop, this move.
+        """
+        moves = []
+
+        for file in range(1 - self.position.file, 8 - self.position.file + 1):
+            for rank in range(1 - self.position.rank, 8 - self.position.rank + 1):
+                if abs(rank) == abs(file) and rank != 0:
+                    moves.append(
+                        Position(
+                            (self.position.file + file, self.position.rank + rank),
+                            mode=1,
+                        )
+                    )
+
+        return moves
+
+
+class Rook(Piece):
+    value = 5
+
+    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+        """Initializes Rook object.
+
+        Args:
+            position (Position): Position of piece on board.
+            colour (bool): Colour of piece.
+            active (bool, optional): If the piece is on the board. Defaults to True.
+        """
+        super().__init__(position, colour, active)
+
+    def __str__(self) -> str:
+        """Returns representation of Rook as a string.
+
+        Returns:
+            str: String representation of rook.
+        """
+        return "R" if self.colour else "r"
+
+    def possible_moves(self) -> list[Position]:
+        """Returns all possible moves for this Rook.
+
+        Returns:
+            list[Position]: Every advancing position possible for this rook, this move.
+        """
+        moves = []
+
+        for n in range(1, 8 + 1):
+            if n != self.position.file:
+                moves.append(Position((n, self.position.rank), mode=1))
+            if n != self.position.rank:
+                moves.append(Position((self.position.file, n), mode=1))
+
+        return moves
+
+
+class Queen(Piece):
+    value = 9
+
+    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+        """Initializes Queen object.
+
+        Args:
+            position (Position): Position of piece on board.
+            colour (bool): Colour of piece.
+            active (bool, optional): If the piece is on the board. Defaults to True.
+        """
+        super().__init__(position, colour, active)
+
+    def __str__(self) -> str:
+        """Returns representation of Queen as a string.
+
+        Returns:
+            str: String representation of queen.
+        """
+        return "Q" if self.colour else "q"
+
+    def possible_moves(self) -> list[Position]:
+        """Returns all possible moves for this Queen.
+
+        Returns:
+            list[Position]: Every advancing position possible for this queen, this move.
+        """
+        moves = []
+
+        for file in range(1 - self.position.file, 8 - self.position.file + 1):
+            for rank in range(1 - self.position.rank, 8 - self.position.rank + 1):
+                if abs(rank) == abs(file) and rank != 0:
+                    moves.append(
+                        Position(
+                            (self.position.file + file, self.position.rank + rank),
+                            mode=1,
+                        )
+                    )
+
+        for n in range(1, 8 + 1):
+            if n != self.position.file:
+                moves.append(Position((n, self.position.rank), mode=1))
+            if n != self.position.rank:
+                moves.append(Position((self.position.file, n), mode=1))
+
+        return moves
+
+
+class King(Piece):
+    value = 10
+
+    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+        """Initializes King object.
+
+        Args:
+            position (Position): Position of piece on board.
+            colour (bool): Colour of piece.
+            active (bool, optional): If the piece is on the board. Defaults to True.
+        """
+        super().__init__(position, colour, active)
+
+    def __str__(self) -> str:
+        """Returns representation of King as a string.
+
+        Returns:
+            str: String representation of king.
+        """
+        return "K" if self.colour else "k"
+
+    def possible_moves(self) -> list[Position]:
+        """Returns all possible moves for this King.
+
+        Returns:
+            list[Position]: Every advancing position possible for this king, this move.
+        """
+        moves = []
+
+        for file in range(
+            max(1, self.position.file - 1), min(8, self.position.file + 1) + 1
+        ):
+            for rank in range(
+                max(1, self.position.rank - 1), min(8, self.position.rank + 1) + 1
+            ):
+                if file != self.position.file or rank != self.position.rank:
+                    moves.append(Position((file, rank), mode=1))
+
+        return moves
 
 
 class Square:
