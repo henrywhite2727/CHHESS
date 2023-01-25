@@ -80,9 +80,9 @@ class Piece:
             "This Piece's class __str__ has not been implemented"
         )
 
-    def find_legal_moves(self) -> list:
+    def possible_moves(self) -> list[Position]:
         raise NotImplementedError(
-            "This Piece's class find_legal_moves has not been implemented"
+            "This Piece's class possible_moves has not been implemented"
         )
 
 
@@ -139,9 +139,6 @@ class Pawn(Piece):
                 )
             )
         return moves
-
-    def promote(self):
-        pass
 
 
 class Knight(Piece):
@@ -465,44 +462,37 @@ class Board:
         if sequence is None:
             # Initialize empty board
             self.board: list[list[Square]] = [
-                [Square((j + 1, i)) for j in range(8)] for i in range(8)
+                [Square(Position((file, rank))) for rank in range(8)]
+                for file in range(8)
             ]
 
-            # Initialize white pieces
-            for j in range(8):
-                self.board[1][j].piece = Piece.Pawn((j + 1, 2), False, True)
-            for j in [0, 7]:
-                self.board[0][j].piece = Piece.Rook((j + 1, 1), False, True)
-            for j in [1, 6]:
-                self.board[0][j].piece = Piece.Knight((j + 1, 1), False, True)
-            for j in [2, 5]:
-                self.board[0][j].piece = Piece.Bishop((j + 1, 1), False, True)
-            self.board[0][3].piece = Piece.Queen((4, 1), False, True)
-            self.board[0][4].piece = Piece.King((5, 1), False, True)
+            # Initialize pieces
+            for colour in (False, True):
+                for file in range(8):
+                    rank = 6 if colour else 1
+                    self.board[rank][file].piece = Pawn(Position((file, rank)), colour)
+                rank = 7 if colour else 0
+                for file in (0, 7):
+                    self.board[rank][file].piece = Rook((file, rank), colour)
+                for file in (1, 6):
+                    self.board[rank][file].piece = Knight((file, rank), colour)
+                for file in (2, 5):
+                    self.board[rank][file].piece = Bishop((file, rank), colour)
+                self.board[rank][3].piece = Queen((file, rank), colour)
+                self.board[rank][4].piece = King((file, rank), colour)
 
-            # Initialize black pieces
-            for j in range(8):
-                self.board[6][j].piece = Piece.Pawn((j + 1, 7), False, True)
-            for j in [0, 7]:
-                self.board[7][j].piece = Piece.Rook((j + 1, 8), False, True)
-            for j in [1, 6]:
-                self.board[7][j].piece = Piece.Knight((j + 1, 8), False, True)
-            for j in [2, 5]:
-                self.board[7][j].piece = Piece.Bishop((j + 1, 8), False, True)
-            self.board[7][3].piece = Piece.Queen((4, 8), False, True)
-            self.board[7][4].piece = Piece.King((5, 8), False, True)
-
-            self.captured: list[list[Piece.Piece]] = [[], []]
+            # Initialize empty list of captured pieces
+            self.captured: list[list[Piece]] = [[], []]
         else:
-            "Implement creating board from sequence"
-            self.board: list[list[Square]] = []
+            # TODO Implement creating board from sequence
+            pass
 
     def __str__(self) -> str:
-        string = ""
+        string = "   _________________\n"
         for i in range(len(self.board) - 1, -1, -1):
-            string += str(i + 1) + "  "
+            string += str(i + 1) + " | "
             for j in range(len(self.board[i])):
                 string += str(self.board[i][j]) + " "
-            string += "\n"
-        string += "   a b c d e f g h"
+            string += "|\n"
+        string += "   ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n    a b c d e f g h"
         return string
