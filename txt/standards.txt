@@ -46,4 +46,11 @@ Position mode: int = mode of initiation
         i.e. ("d", 2)
     3 = str
         i.e. "d2"
+
+Notation mode: str, int = mode of notation 
+    SAN = 0 = Short Algebraic Notation
+    LAN = 1 = Long Algebraic Notation
+    ICCF = 2 = ICCF Numeric Notation
+    PGN = 3 = Portable Game Notation
+
     

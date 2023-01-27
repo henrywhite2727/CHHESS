@@ -393,10 +393,14 @@ class Square:
 
 class Event:
     def __init__(
-        self, depart: Square, arrive: Square, mode: str = "SAN", disam: int = 0
+        self,
+        depart: Square,
+        arrive: Square,
+        mode: Union[str, int] = "PGN",
+        disam: int = 0,
     ) -> None:
         # TODO implement other notations
-        # Assume legal moves by the power of Piece
+        # Assume legal moves by the power of Referee
         self.depart: Square = depart
         self.arrive: Square = arrive
         self.capture: bool = False
@@ -422,19 +426,59 @@ class Event:
 
 
 class Sequence:
-    def __init__(self, mode: str = "PGN") -> None:
+    def __init__(self, mode: Union[str, int] = 3, sequence: str = None) -> None:
         # TODO Initialize from input
-        if mode == "SAN":
-            pass
-        elif mode == "LAN":
-            pass
-        elif mode == "PGN":
+        if (
+            isinstance(mode, str)
+            and mode == "SAN"
+            or isinstance(mode, int)
+            and mode == 0
+        ):
+            raise NotImplementedError()
+        elif (
+            isinstance(mode, str)
+            and mode == "LAN"
+            or isinstance(mode, int)
+            and mode == 1
+        ):
+            raise NotImplementedError()
+        elif (
+            isinstance(mode, str)
+            and mode == "ICFF"
+            or isinstance(mode, int)
+            and mode == 2
+        ):
+            raise NotImplementedError()
+        elif (
+            isinstance(mode, str)
+            and mode == "PGN"
+            or isinstance(mode, int)
+            and mode == 3
+        ):
             pass
         else:
             raise ValueError("Invalid game notation standard.")
         self.mode: str = mode
-        self.sequence: list[Event] = []
-        self.moves: int = 0
+
+        if sequence is not None:
+            pass
+        else:
+            self.sequence: list[Event] = []
+            self.moves: int = 0
+
+            # PGN match data
+            self.event: str = ""
+            self.site: str = ""
+            self.date: list[int] = []
+            self.date_event: list[int] = []
+            self.round: int = 0
+            self.result: list[int] = []
+            self.white: str = []
+            self.black: str = []
+            self.eco: str = []
+            self.elo_white: int = 0
+            self.elo_black: int = 0
+            self.count_ply: int = 0
 
     def __str__(self):
         string = ""
