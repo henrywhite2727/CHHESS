@@ -391,7 +391,7 @@ class Square:
             str: Algebraic representation of Square.
         """
         if self.piece is None:
-            return "-"
+            return "=" if (self.position.file + self.position.rank) % 2 == 0 else "-"
         else:
             return str(self.piece)
 
@@ -407,9 +407,9 @@ class Event:
         self.capture = False
         if self.arrive.piece is not None:
             self.capture = True
-        if self.disam is not None and self.disam not in (0, 1, 2, 3):
-            raise ValueError("Invalid disambiguation mode " + str(self.disam) + ".")
         self.disam = disam
+        if self.disam not in (0, 1, 2, 3):
+            raise ValueError("Invalid disambiguation mode " + str(self.disam) + ".")
         self.mode = mode
 
     def __str__(self):
@@ -437,7 +437,7 @@ class Sequence:
             else:
                 raise ValueError("Invalid game notation standard.")
         self.mode = mode
-        self.sequence = []
+        self.sequence: list[Event] = []
         self.moves = 0
 
     def __str__(self):
@@ -463,10 +463,14 @@ class Board:
             refers to black.
         colour (bool): Colour corresponding to the player who moves next.
         notate (bool): Toggles algebraic notation display.
+        sequence (Sequence): Sequence representing move history.
     """
 
     def __init__(self, sequence: Sequence = None, notate: bool = False) -> None:
         if sequence is None:
+            # Initialize empty Sequence
+            self.sequence = Sequence()
+
             # Initialize empty list of active pieces
             self.active: list[list[Piece]] = [[], []]
 
@@ -507,6 +511,7 @@ class Board:
                 self.active[i_c].append(King(Position((rank, 4)), colour))
                 self.board[rank][4].piece = self.active[i_c][-1]
         else:
+            self.sequence = sequence
             # TODO Implement creating board from sequence
             pass
 
