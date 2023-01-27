@@ -27,25 +27,25 @@ class Referee:
 
         # Remove blocked lines of sights
         if isinstance(piece, Objects.Pawn):
-            return Referee.Pawn.prune_blocked(moves, piece, board)
+            return Referee.Pawn.prune_lines(moves, piece, board)
         elif isinstance(piece, Objects.Bishop):
-            return Referee.Bishop.prune_blocked(moves, piece)
+            return Referee.Bishop.prune_lines(moves, piece)
         elif isinstance(piece, Objects.Rook):
-            return Referee.Rook.prune_blocked(moves, piece, board)
+            return Referee.Rook.prune_lines(moves, piece)
         elif isinstance(piece, Objects.Queen):
-            return Referee.los_queen(moves, piece, board)
+            return Referee.Queen.prune_lines(moves, piece)
 
         # Remove moves that arrive on a piece of the same team
         i = 0
         while i < len(moves):
-            if board.colour == moves[i].piece.colour:
+            if moves[i].piece is not None and board.colour == moves[i].piece.colour:
                 moves.pop(i)
                 i -= 1
             i += 1
 
-        # Remove moves that result in a check
+        # TODO Remove moves that result in a check
 
-        pass
+        return moves
 
     # def check_check(board: Objects.Board) -> bool:
     #     """Returns True if the board is in a checked state.
@@ -89,7 +89,7 @@ class Referee:
 
     class Pawn:
         # TODO This method only needs board for the most recent move for en passant
-        def prune_blocked(
+        def prune_lines(
             moves: list[Objects.Square], pawn: Objects.Pawn, board: Objects.Board
         ) -> list[Objects.Square]:
             """Prunes blocked lines of sight within the passed set of moves for
@@ -168,7 +168,7 @@ class Referee:
             return True
 
     class Bishop:
-        def prune_blocked(
+        def prune_lines(
             moves: list[Objects.Square], bishop: Objects.Bishop
         ) -> list[Objects.Square]:
             """Prunes blocked lines of sight within the passed set of moves for
@@ -186,22 +186,18 @@ class Referee:
             file_p, rank_p = bishop.position.file, bishop.position.rank
             left, right, up, down = file_p - 1, 8 - file_p, 8 - rank_p, rank_p - 1
 
-            moves = Referee.Bishop.clean_line_of_sight(
-                moves, bishop, min(right, up), True, True
-            )
-            moves = Referee.Bishop.clean_line_of_sight(
+            moves = Referee.Bishop.prune_line(moves, bishop, min(right, up), True, True)
+            moves = Referee.Bishop.prune_line(
                 moves, bishop, min(right, down), False, True
             )
-            moves = Referee.Bishop.clean_line_of_sight(
+            moves = Referee.Bishop.prune_line(
                 moves, bishop, min(left, down), False, False
             )
-            moves = Referee.Bishop.clean_line_of_sight(
-                moves, bishop, min(left, up), True, False
-            )
+            moves = Referee.Bishop.prune_line(moves, bishop, min(left, up), True, False)
 
             return moves
 
-        def clean_line_of_sight(
+        def prune_line(
             moves: list[Objects.Square],
             bishop: Objects.Bishop,
             sight: int,
@@ -225,7 +221,7 @@ class Referee:
             i, f, r, prune = 0, 1 if right else -1, 1 if up else -1, False
 
             # Loop over moves list to find squares along single line of sight
-            while i < len(moves) and abs(f) >= sight and abs(r) >= sight:
+            while i < len(moves) and abs(f) <= sight and abs(r) <= sight:
                 file_m, rank_m = moves[i].position.file, moves[i].position.rank
                 piece_a = moves[i].piece
 
@@ -246,8 +242,8 @@ class Referee:
             return moves
 
     class Rook:
-        def prune_blocked(
-            moves: list[Objects.Square], rook: Objects.Rook, board: Objects.Board
+        def prune_lines(
+            moves: list[Objects.Square], rook: Objects.Rook
         ) -> list[Objects.Square]:
             """Prunes blocked lines of sight within the passed set of moves for
             this piece.
@@ -264,19 +260,19 @@ class Referee:
             file_p, rank_p = rook.position.file, rook.position.rank
             left, right, up, down = file_p - 1, 8 - file_p, 8 - rank_p, rank_p - 1
 
-            moves = Referee.Rook.clean_line_of_sight(moves, rook, right, True, True)
-            moves = Referee.Rook.clean_line_of_sight(moves, rook, down, False, True)
-            moves = Referee.Rook.clean_line_of_sight(moves, rook, left, False, False)
-            moves = Referee.Rook.clean_line_of_sight(moves, rook, up, True, False)
+            moves = Referee.Rook.prune_line(moves, rook, right, True, True)
+            moves = Referee.Rook.prune_line(moves, rook, down, False, False)
+            moves = Referee.Rook.prune_line(moves, rook, left, False, True)
+            moves = Referee.Rook.prune_line(moves, rook, up, True, False)
 
             return moves
 
-        def clean_line_of_sight(
+        def prune_line(
             moves: list[Objects.Square],
-            bishop: Objects.Bishop,
+            rook: Objects.Rook,
             sight: int,
-            up: bool,
-            right: bool,
+            increasing: bool,
+            along_files: bool,
         ) -> list[Objects.Square]:
             """Prunes one line of sight within the passed set of moves for this piece.
 
@@ -284,35 +280,69 @@ class Referee:
                 moves (list[Objects.Square]): Possible moves for this piece.
                 rook (Objects.Rook): Rook in play.
                 sight (int): Length of the line of sight, by number of squares.
-                up (bool): If the line of sight is towards the 8-rank.
-                right (bool): If the line of sight is towards the h-file.
+                increasing (bool): If the line of sight is towards the 8-rank or
+                h-file.
+                along_files (bool): If the line of sight is along the files.
 
             Returns:
                 list[Objects.Square]: Possible moves for this piece, with a
                     single line of sight pruned.
             """
-            # TODO not implemented
-            file_p, rank_p = bishop.position.file, bishop.position.rank
-            i, f, r, prune = 0, 1 if right else -1, 1 if up else -1, False
+            axis_p = rook.position.file if along_files else rook.position.rank
+            i, a, prune = 0, 1 if increasing else -1, False
 
             # Loop over moves list to find squares along single line of sight
-            while i < len(moves) and abs(f) >= sight and abs(r) >= sight:
-                file_m, rank_m = moves[i].position.file, moves[i].position.rank
+            while i < len(moves) and abs(a) <= sight:
+                axis_m = (
+                    moves[i].position.file if along_files else moves[i].position.rank
+                )
                 piece_a = moves[i].piece
 
                 # Prune move if line of sight is blocked
-                if file_m == file_p + f and rank_m == rank_p + r:
+                if axis_m == axis_p + a:
                     if prune or piece_a is not None:
-                        if prune or piece_a.colour == bishop.colour:
+                        if prune or piece_a.colour == rook.colour:
                             moves.pop(i)
-                        i, f, r, prune = (
-                            -1,
-                            f + (1 if right else -1),
-                            r + (1 if up else -1),
-                            True,
-                        )
+                        i, a, prune = -1, a + (1 if increasing else -1), True
 
                 i += 1
+
+            return moves
+
+    class Queen:
+        def prune_lines(
+            moves: list[Objects.Square], queen: Objects.Queen
+        ) -> list[Objects.Square]:
+            """Prunes blocked lines of sight within the passed set of moves for
+            this piece.
+
+            Args:
+                moves (list[Objects.Square]): Moves possible for this piece.
+                queen (Objects.Queen): Queen in play.
+                board (Objects.Board): Board in play.
+
+            Returns:
+                list[Objects.Square]: Possible moves for this piece, with
+                    blocked lines of sight pruned.
+            """
+            file_p, rank_p = queen.position.file, queen.position.rank
+            left, right, up, down = file_p - 1, 8 - file_p, 8 - rank_p, rank_p - 1
+
+            # Clean diagonal lines of sight
+            moves = Referee.Bishop.prune_line(moves, queen, min(right, up), True, True)
+            moves = Referee.Bishop.prune_line(
+                moves, queen, min(right, down), False, True
+            )
+            moves = Referee.Bishop.prune_line(
+                moves, queen, min(left, down), False, False
+            )
+            moves = Referee.Bishop.prune_line(moves, queen, min(left, up), True, False)
+
+            # Clean axis lines of sight
+            moves = Referee.Rook.prune_line(moves, queen, right, True, True)
+            moves = Referee.Rook.prune_line(moves, queen, down, False, False)
+            moves = Referee.Rook.prune_line(moves, queen, left, False, True)
+            moves = Referee.Rook.prune_line(moves, queen, up, True, False)
 
             return moves
 
@@ -347,11 +377,11 @@ class Player:
 
 
 board = Objects.Board(notate=True)
-piece = board.active[0][3]
 print(board)
-print(piece, piece.position)
-for move in Referee.legal_moves(piece, board):
-    print(move.position)
+for piece in board.active[0]:
+    print(piece, piece.position)
+    for move in Referee.legal_moves(piece, board):
+        print(move.position)
 
 # def move():
 #     """

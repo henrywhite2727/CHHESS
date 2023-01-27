@@ -1,3 +1,4 @@
+# TODO write __repr__ for every class
 from typing import Union
 
 
@@ -30,17 +31,17 @@ class Position:
         """
         match mode:
             case 0:
-                self.file = position[1] + 1
-                self.rank = position[0] + 1
+                self.file: int = position[1] + 1
+                self.rank: int = position[0] + 1
             case 1:
-                self.file = position[0]
-                self.rank = position[1]
+                self.file: int = position[0]
+                self.rank: int = position[1]
             case 2:
-                self.file = ord(position[0]) - ord("a")
-                self.rank = position[1]
+                self.file: int = ord(position[0]) - ord("a")
+                self.rank: int = position[1]
             case 3:
-                self.file = ord(position[0]) - ord("a") + 1
-                self.rank = ord(position[1]) - ord("1") + 1
+                self.file: int = ord(position[0]) - ord("a") + 1
+                self.rank: int = ord(position[1]) - ord("1") + 1
             case _:
                 raise ValueError("Invalid mode for position initialization.")
         if self.file < 1 or self.file > 8 or self.rank < 1 or self.rank > 8:
@@ -71,9 +72,9 @@ class Position:
 
 class Piece:
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
-        self.position = position
-        self.colour = colour
-        self.active = active
+        self.position: Position = position
+        self.colour: bool = colour
+        self.active: bool = active
 
     def __str__(self) -> str:
         return NotImplementedError(
@@ -87,7 +88,7 @@ class Piece:
 
 
 class Pawn(Piece):
-    value = 1
+    value: int = 1
 
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
         """Initializes Pawn object.
@@ -113,7 +114,7 @@ class Pawn(Piece):
         Returns:
             list[Position]: Every advancing position possible for this pawn, this move.
         """
-        moves = []
+        moves: list[Position] = []
 
         # Beginning pawn can advance up to two ranks
         if (not self.colour and self.position.rank == 2) or (
@@ -142,7 +143,7 @@ class Pawn(Piece):
 
 
 class Knight(Piece):
-    value = 3
+    value: int = 3
 
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
         """Initializes Knight object.
@@ -168,7 +169,7 @@ class Knight(Piece):
         Returns:
             list[Position]: Every advancing position possible for this knight, this move.
         """
-        moves = []
+        moves: list[Position] = []
 
         wide = [
             [self.position.file - 2, self.position.file + 2],
@@ -179,25 +180,19 @@ class Knight(Piece):
             [self.position.rank - 2, self.position.rank + 2],
         ]
 
-        for i in (0, 1):
-            for j in (0, 1):
-                if wide[i][j] < 1 or wide[i][j] > 8:
-                    wide[i].pop(j)
-                if tall[i][j] < 1 or tall[i][j] > 8:
-                    tall[i].pop(j)
-
         for file in wide[0]:
             for rank in wide[1]:
-                moves.append(Position((file, rank), mode=1))
+                if file >= 1 and file <= 8 and rank >= 1 and rank <= 8:
+                    moves.append(Position((file, rank), mode=1))
         for file in tall[0]:
             for rank in tall[1]:
-                moves.append(Position((file, rank), mode=1))
-
+                if file >= 1 and file <= 8 and rank >= 1 and rank <= 8:
+                    moves.append(Position((file, rank), mode=1))
         return moves
 
 
 class Bishop(Piece):
-    value = 3
+    value: int = 3
 
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
         """Initializes Bishop object.
@@ -223,7 +218,7 @@ class Bishop(Piece):
         Returns:
             list[Position]: Every advancing position possible for this bishop, this move.
         """
-        moves = []
+        moves: list[Position] = []
 
         for file in range(1 - self.position.file, 8 - self.position.file + 1):
             for rank in range(1 - self.position.rank, 8 - self.position.rank + 1):
@@ -239,7 +234,7 @@ class Bishop(Piece):
 
 
 class Rook(Piece):
-    value = 5
+    value: int = 5
 
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
         """Initializes Rook object.
@@ -265,7 +260,7 @@ class Rook(Piece):
         Returns:
             list[Position]: Every advancing position possible for this rook, this move.
         """
-        moves = []
+        moves: list[Position] = []
 
         for n in range(1, 8 + 1):
             if n != self.position.file:
@@ -277,7 +272,7 @@ class Rook(Piece):
 
 
 class Queen(Piece):
-    value = 9
+    value: int = 9
 
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
         """Initializes Queen object.
@@ -303,7 +298,7 @@ class Queen(Piece):
         Returns:
             list[Position]: Every advancing position possible for this queen, this move.
         """
-        moves = []
+        moves: list[Position] = []
 
         for file in range(1 - self.position.file, 8 - self.position.file + 1):
             for rank in range(1 - self.position.rank, 8 - self.position.rank + 1):
@@ -325,7 +320,7 @@ class Queen(Piece):
 
 
 class King(Piece):
-    value = 10
+    value: int = 10
 
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
         """Initializes King object.
@@ -351,7 +346,7 @@ class King(Piece):
         Returns:
             list[Position]: Every advancing position possible for this king, this move.
         """
-        moves = []
+        moves: list[Position] = []
 
         for file in range(
             max(1, self.position.file - 1), min(8, self.position.file + 1) + 1
@@ -380,8 +375,8 @@ class Square:
             position (Position): Position object representing position on the board.
             piece (Piece.Piece, optional): Piece occupying the Square. Defaults to None.
         """
-        self.position = position
-        self.piece = piece
+        self.position: Position = position
+        self.piece: Piece = piece
 
     def __str__(self) -> str:
         """Returns representation of Square as a string. Prints one character
@@ -402,15 +397,15 @@ class Event:
     ) -> None:
         # TODO implement other notations
         # Assume legal moves by the power of Piece
-        self.depart = depart
-        self.arrive = arrive
-        self.capture = False
+        self.depart: Square = depart
+        self.arrive: Square = arrive
+        self.capture: bool = False
         if self.arrive.piece is not None:
             self.capture = True
-        self.disam = disam
+        self.disam: int = disam
         if self.disam not in (0, 1, 2, 3):
             raise ValueError("Invalid disambiguation mode " + str(self.disam) + ".")
-        self.mode = mode
+        self.mode: str = mode
 
     def __str__(self):
         string = str(self.depart.piece)
@@ -427,18 +422,19 @@ class Event:
 
 
 class Sequence:
-    def __init__(self, mode: str = "SAN") -> None:
+    def __init__(self, mode: str = "PGN") -> None:
         # TODO Initialize from input
-        if mode != "SAN":
-            if mode == "LAN":
-                pass
-            elif mode == "PGN":
-                pass
-            else:
-                raise ValueError("Invalid game notation standard.")
-        self.mode = mode
+        if mode == "SAN":
+            pass
+        elif mode == "LAN":
+            pass
+        elif mode == "PGN":
+            pass
+        else:
+            raise ValueError("Invalid game notation standard.")
+        self.mode: str = mode
         self.sequence: list[Event] = []
-        self.moves = 0
+        self.moves: int = 0
 
     def __str__(self):
         string = ""
@@ -469,7 +465,7 @@ class Board:
     def __init__(self, sequence: Sequence = None, notate: bool = False) -> None:
         if sequence is None:
             # Initialize empty Sequence
-            self.sequence = Sequence()
+            self.sequence: Sequence = Sequence()
 
             # Initialize empty list of active pieces
             self.active: list[list[Piece]] = [[], []]
@@ -478,10 +474,10 @@ class Board:
             self.captured: list[list[Piece]] = [[], []]
 
             # White begins
-            self.colour = False
+            self.colour: bool = False
 
             # Default no notation
-            self.notate = notate
+            self.notate: bool = notate
 
             # Initialize empty board
             self.board: list[list[Square]] = [
@@ -511,7 +507,7 @@ class Board:
                 self.active[i_c].append(King(Position((rank, 4)), colour))
                 self.board[rank][4].piece = self.active[i_c][-1]
         else:
-            self.sequence = sequence
+            self.sequence: Sequence = sequence
             # TODO Implement creating board from sequence
             pass
 
