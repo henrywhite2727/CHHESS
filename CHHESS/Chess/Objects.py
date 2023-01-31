@@ -386,7 +386,9 @@ class Square:
             str: Algebraic representation of Square.
         """
         if self.piece is None:
-            return "=" if (self.position.file + self.position.rank) % 2 == 0 else "-"
+            # return "=" if (self.position.file + self.position.rank) % 2 == 0
+            # else "-"
+            return "-"
         else:
             return str(self.piece)
 
