@@ -3,6 +3,93 @@ import Objects
 
 
 class Referee:
+    def legal_moves(
+        piece: Objects.Piece,
+        board: Objects.Board,
+        check_check=False,
+    ) -> list[Objects.Square]:
+        if piece is None or board is None:
+            raise ValueError("Invalid piece or board.")
+        # Get all possible moves as a list of Squares
+        moves = Referee.moves_as_squares(piece.possible_moves(), board)
+
+        # Remove blocked lines of sights
+        if isinstance(piece, Objects.Pawn):
+            moves = Referee.Pawn.prune_lines(moves, piece, board)
+        elif isinstance(piece, Objects.Bishop):
+            moves = Referee.Bishop.prune_lines(moves, piece)
+        elif isinstance(piece, Objects.Rook):
+            moves = Referee.Rook.prune_lines(moves, piece)
+        elif isinstance(piece, Objects.Queen):
+            moves = Referee.Queen.prune_lines(moves, piece)
+
+        # Remove moves that arrive on a piece of the same team
+        i = 0
+        while i < len(moves):
+            if moves[i].piece is not None and board.colour == moves[i].piece.colour:
+                moves.pop(i)
+                i -= 1
+            i += 1
+
+        # Remove moves that result in a check
+        if not check_check:
+            i = 0
+            while i < len(moves):
+                board_copy = Referee.copy_board(board)
+                i_d, i_a = piece.position.index(), moves[i].position.index()
+                Player.move(
+                    board_copy,
+                    Objects.Event(
+                        board_copy.board[i_d[0]][i_d[1]],
+                        board_copy.board[i_a[0]][i_a[1]],
+                    ),
+                )
+                print(
+                    board_copy.board[i_d[0]][i_d[1]].position,
+                    board_copy.board[i_a[0]][i_a[1]].position,
+                )
+                if Referee.check_check(board_copy):
+                    moves.pop(i)
+                    i -= 1
+                i += 1
+
+        return moves
+
+    def check_check(board: Objects.Board) -> bool:
+        """Returns True if the board is in a checked state.
+
+        Args:
+            board (Objects.Board): The current board.
+
+        Returns:
+            bool: Whether or not the current player is in check.
+        """
+        # Check every one of opponent's legal moves for King
+        for piece in board.active[0 if board.colour else 1]:
+            print("checking", piece, piece.position)
+            for move in Referee.legal_moves(piece, board, check_check=True):
+                if isinstance(move.piece, Objects.King):
+                    print("found", piece, piece.position, move.piece.position)
+                if isinstance(move.piece, Objects.King) and (
+                    (move.piece.colour == board.colour)
+                ):
+                    return True
+        return False
+
+    def check_mate(board: Objects.Board) -> bool:
+        """Returns True if the board is in a checkmate state.
+
+        Args:
+            board (Objects.Board): The current board.
+
+        Returns:
+            bool: Whether or not the current player is in checkmate.
+        """
+        for piece in board.active[1 if board.colour else 0]:
+            if len(Referee.legal_moves(piece, board)) > 0:
+                return False
+        return True
+
     def moves_as_squares(
         moves: list[Objects.Position], board: Objects.Board
     ) -> list[Objects.Square]:
@@ -21,81 +108,21 @@ class Referee:
             moves_squares.append(board.board[move.index()[0]][move.index()[1]])
         return moves_squares
 
-    def legal_moves(
-        piece: Objects.Piece, board: Objects.Board, checked: bool = False
-    ) -> list[Objects.Square]:
-        if piece is None or board is None:
-            raise ValueError("Invalid piece or board.")
-        if checked:
-            pass
-        else:
-            # Get all possible moves as a list of Squares
-            moves = Referee.moves_as_squares(piece.possible_moves(), board)
-
-            # Remove blocked lines of sights
-            if isinstance(piece, Objects.Pawn):
-                moves = Referee.Pawn.prune_lines(moves, piece, board)
-            elif isinstance(piece, Objects.Bishop):
-                moves = Referee.Bishop.prune_lines(moves, piece)
-            elif isinstance(piece, Objects.Rook):
-                moves = Referee.Rook.prune_lines(moves, piece)
-            elif isinstance(piece, Objects.Queen):
-                moves = Referee.Queen.prune_lines(moves, piece)
-
-            # Remove moves that arrive on a piece of the same team
-            i = 0
-            while i < len(moves):
-                if moves[i].piece is not None and board.colour == moves[i].piece.colour:
-                    moves.pop(i)
-                    i -= 1
-                i += 1
-
-            # TODO Remove moves that result in a check
-
-        return moves
-
     def copy_board(board: Objects.Board) -> Objects.Board:
-        return Objects.Board(board.sequence)
+        board_copy = Objects.Board()
 
-    # def check_check(board: Objects.Board) -> bool:
-    #     """Returns True if the board is in a checked state.
+        for event in board.sequence.sequence:
+            split = event.split()
+            i_d = Objects.Position(split[0], mode=3).index()
+            i_a = Objects.Position(split[1], mode=3).index()
+            Player.move(
+                board_copy,
+                Objects.Event(
+                    board_copy.board[i_d[0]][i_d[1]], board_copy.board[i_a[0]][i_a[1]]
+                ),
+            )
 
-    #     Args:
-    #         board (Objects.Board): The current board.
-
-    #     Returns:
-    #         bool: Whether or not the current player is in check.
-    #     """
-    #     # Check every one of opponent's legal moves for King
-    #     for piece in board.active[0 if board.colour else 1]:
-    #         for move in legal_moves(piece, board):
-    #             if isinstance(move.piece, Objects.King) and (
-    #                 (move.piece.colour and board.colour)
-    #                 or (not move.piece.colour and not board.colour)
-    #             ):
-    #                 return True
-    #     return False
-
-    # def check_mate(board: Objects.Board) -> bool:
-    #     """Returns True if the board is in a checkmate state.
-
-    #     Args:
-    #         board (Objects.Board): The current board.
-
-    #     Returns:
-    #         bool: Whether or not the current player is in checkmate.
-    #     """
-    #     for piece in board.active[1 if board.colour else 0]:
-    #         if (
-    #             isinstance(piece, Objects.King)
-    #             and (
-    #                 (piece.colour and board.colour)
-    #                 or (not piece.colour and not board.colour)
-    #             )
-    #             and len(legal_moves(piece.possible_moves(), board)) == 0
-    #         ):
-    #             return True
-    #     return False
+        return board_copy
 
     class Pawn:
         # TODO This method only needs board for the most recent move for en passant
@@ -126,14 +153,15 @@ class Referee:
                     # If single advancement blocked, remove both single and double
                     if rank_m == rank_p + (-1 if pawn.colour else 1):
                         moves.pop(i)
-                        i -= 1
+                        i, j = i - 1, 0
                         # Search through moves for double to remove
-                        for j in range(len(moves)):
+                        while j < (len(moves)):
                             if moves[j].position.rank == rank_p + (
                                 -2 if pawn.colour else 2
                             ):
                                 moves.pop(j)
-                                i -= 1
+                                i, j = i - 1, j - 1
+                            j += 1
                     # If double advancement blocked, only remove double
                     if rank_m == rank_p + (-2 if pawn.colour else 2):
                         moves.pop(i)
@@ -163,16 +191,18 @@ class Referee:
             Returns:
                 bool: True if the pawn is able to capture en passant on the side specified.
             """
+            if len(board.sequence.sequence) == 0:
+                return False
+            i_last = Objects.Position(
+                board.sequence.sequence[-1].split()[1], mode=3
+            ).index()
+            p_last = board.board[i_last[0]][i_last[1]]
             if (
                 (pawn.colour and pawn.position.rank != 4)
                 or (not pawn.colour and pawn.position.rank != 5)
-                or not isinstance(
-                    board.sequence.sequence[-1].depart.piece, Objects.Pawn
-                )
-                or board.sequence.sequence[-1].arrive.position.file
-                != pawn.position.file + (-1 if left else -1)
-                or board.sequence.sequence[-1].arrive.position.rank
-                != (4 if pawn.colour else 5)
+                or not isinstance(p_last, Objects.Pawn)
+                or p_last.position.file != pawn.position.file + (-1 if left else -1)
+                or p_last.position.rank != (4 if pawn.colour else 5)
             ):
                 return False
             return True
@@ -386,41 +416,78 @@ class Player:
                     break
 
         # Move piece from depart to arrive
-        i_a = event.arrive.position.index()
-        i_d = event.depart.position.index()
+        i_a, i_d = event.arrive.position.index(), event.depart.position.index()
         board.board[i_a[0]][i_a[1]].piece = event.depart.piece
         board.board[i_a[0]][i_a[1]].piece.position = event.arrive.position
         board.board[i_d[0]][i_d[1]].piece = None
 
         board.sequence.add_event(event)
-        board.colour = not board.colour
 
         return board
 
-    def user_turn(board: Objects.Board) -> None:
+    def user_turn(board: Objects.Board) -> bool:
         print(board)
+
+        # Ends game if board in mate state
+        if Referee.check_mate(board):
+            print("White" if board.colour else "Black", "has won.")
+            return False
 
         # Current input: depart arrive, e.g. e4 e6
         input_user = input().split()
         i_d = Objects.Position(input_user[0], mode=3).index()
-        i_s = Objects.Position(input_user[1], mode=3).index()
+        i_a = Objects.Position(input_user[1], mode=3).index()
 
         # Restarts turn if move not legal
         legal_moves = Referee.legal_moves(board.board[i_d[0]][i_d[1]].piece, board)
         legal_pos = [str(legal_moves[i].position) for i in range(len(legal_moves))]
         if str(Objects.Position(input_user[1], mode=3)) not in legal_pos:
             print("Invalid move. Please try another move.")
-            return
+            return True
 
         # Move piece across board and change turn
-        event = Objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_s[0]][i_s[1]])
-        Player.move(board, event)
+        event = Objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]])
+        board = Player.move(board, event)
+        board.colour = not board.colour
 
     def play():
         board = Objects.Board(notate=True)
+        events = [
+            "e2 e4",
+            "d7 d5",
+            "e4 d5",
+            "d8 d5",
+            "d2 d4",
+            "d5 d4",
+            "f2 f4",
+            "c8 g4",
+        ]
+        for event in events:
+            split = event.split()
+            i_d = Objects.Position(split[0], mode=3).index()
+            i_a = Objects.Position(split[1], mode=3).index()
+            Player.move(
+                board,
+                Objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]]),
+            )
 
-        for i in range(10):
-            Player.user_turn(board)
+        for piece in board.active[0]:
+            print(
+                piece,
+                [str(move.position) for move in Referee.legal_moves(piece, board)],
+            )
+
+        # for i in range(10):
+        #     if not Player.user_turn(board):
+        #         break
+        #     for piece in board.active[0]:
+        #         if isinstance(piece, Objects.King):
+        #             print(
+        #                 [
+        #                     str(move.position)
+        #                     for move in Referee.legal_moves(piece, board)
+        #                 ]
+        #             )
 
 
 Player.play()
