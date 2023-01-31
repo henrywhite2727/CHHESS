@@ -396,7 +396,7 @@ class Event:
         self,
         depart: Square,
         arrive: Square,
-        mode: Union[str, int] = "PGN",
+        mode: Union[str, int] = 4,
         disam: int = 0,
     ) -> None:
         # TODO implement other notations
@@ -412,58 +412,91 @@ class Event:
         self.mode: str = mode
 
     def __str__(self):
-        string = str(self.depart.piece)
-        if self.disam == 1:
-            string += str(self.depart.position)[0]
-        elif self.disam == 2:
-            string += str(self.depart.position.rank)
-        elif self.disam == 3:
-            string += str(self.depart.position)
-        if self.capture:
-            string += "x"
-        string += str(self.arrive.position)
-        return string
+        if (
+            isinstance(self.mode, str)
+            and self.mode == "SAN"
+            or isinstance(self.mode, int)
+            and self.mode == 0
+        ):
+            string = str(self.depart.piece)
+            match self.disam:
+                case 1:
+                    string += str(self.depart.position)[0]
+                case 2:
+                    string += str(self.depart.position.rank)
+                case 3:
+                    string += str(self.depart.position)
+            if self.capture:
+                string += "x"
+            string += str(self.arrive.position)
+            return string
+        elif (
+            isinstance(self.mode, str)
+            and self.mode == "LAN"
+            or isinstance(self.mode, int)
+            and self.mode == 1
+        ):
+            raise NotImplementedError()
+        elif (
+            isinstance(self.mode, str)
+            and self.mode == "ICFF"
+            or isinstance(self.mode, int)
+            and self.mode == 2
+        ):
+            raise NotImplementedError()
+        elif (
+            isinstance(self.mode, str)
+            and self.mode == "PGN"
+            or isinstance(self.mode, int)
+            and self.mode == 3
+        ):
+            raise NotImplementedError()
+        elif (
+            isinstance(self.mode, str)
+            and self.mode == "HHN"
+            or isinstance(self.mode, int)
+            and self.mode == 4
+        ):
+            return str(self.depart.position) + " " + str(self.arrive.position)
 
 
 class Sequence:
-    def __init__(self, mode: Union[str, int] = 3, sequence: str = None) -> None:
-        # TODO Initialize from input
-        if (
-            isinstance(mode, str)
-            and mode == "SAN"
-            or isinstance(mode, int)
-            and mode == 0
-        ):
-            raise NotImplementedError()
-        elif (
-            isinstance(mode, str)
-            and mode == "LAN"
-            or isinstance(mode, int)
-            and mode == 1
-        ):
-            raise NotImplementedError()
-        elif (
-            isinstance(mode, str)
-            and mode == "ICFF"
-            or isinstance(mode, int)
-            and mode == 2
-        ):
-            raise NotImplementedError()
-        elif (
-            isinstance(mode, str)
-            and mode == "PGN"
-            or isinstance(mode, int)
-            and mode == 3
-        ):
-            pass
-        else:
-            raise ValueError("Invalid game notation standard.")
-        self.mode: str = mode
-
+    def __init__(self, mode: Union[str, int] = 3, sequence: list[str] = None) -> None:
         if sequence is not None:
-            pass
+            # TODO Initialize from input
+            if (
+                isinstance(mode, str)
+                and mode == "SAN"
+                or isinstance(mode, int)
+                and mode == 0
+            ):
+                raise NotImplementedError()
+            elif (
+                isinstance(mode, str)
+                and mode == "LAN"
+                or isinstance(mode, int)
+                and mode == 1
+            ):
+                raise NotImplementedError()
+            elif (
+                isinstance(mode, str)
+                and mode == "ICFF"
+                or isinstance(mode, int)
+                and mode == 2
+            ):
+                raise NotImplementedError()
+            elif (
+                isinstance(mode, str)
+                and mode == "PGN"
+                or isinstance(mode, int)
+                and mode == 3
+            ):
+                pass
+            else:
+                raise ValueError("Invalid game notation standard.")
+            self.mode: str = mode
         else:
-            self.sequence: list[Event] = []
+            self.sequence: list[str] = []
             self.moves: int = 0
 
             # PGN match data
@@ -473,9 +506,9 @@ class Sequence:
             self.date_event: list[int] = []
             self.round: int = 0
             self.result: list[int] = []
-            self.white: str = []
-            self.black: str = []
-            self.eco: str = []
+            self.white: str = ""
+            self.black: str = ""
+            self.eco: str = ""
             self.elo_white: int = 0
             self.elo_black: int = 0
             self.count_ply: int = 0
@@ -483,10 +516,11 @@ class Sequence:
     def __str__(self):
         string = ""
         for i in range(len(self.sequence)):
-            string += str(i) + ". " + str(self.sequence[i]) + " "
+            string += str(i + 1) + ". " + str(self.sequence[i]) + " "
+        return string
 
     def add_event(self, event: Event):
-        self.sequence.append(event)
+        self.sequence.append(str(event))
 
 
 class Board:

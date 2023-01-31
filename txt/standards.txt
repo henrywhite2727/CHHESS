@@ -52,5 +52,6 @@ Notation mode: str, int = mode of notation
     LAN = 1 = Long Algebraic Notation
     ICCF = 2 = ICCF Numeric Notation
     PGN = 3 = Portable Game Notation
+    HHN = 4 = CHHESS Notation (depart arrive)
 
     

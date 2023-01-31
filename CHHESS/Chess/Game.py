@@ -21,31 +21,41 @@ class Referee:
             moves_squares.append(board.board[move.index()[0]][move.index()[1]])
         return moves_squares
 
-    def legal_moves(piece: Objects.Piece, board: Objects.Board) -> list[Objects.Square]:
-        # Get all possible moves as a list of Squares
-        moves = Referee.moves_as_squares(piece.possible_moves(), board)
+    def legal_moves(
+        piece: Objects.Piece, board: Objects.Board, checked: bool = False
+    ) -> list[Objects.Square]:
+        if piece is None or board is None:
+            raise ValueError("Invalid piece or board.")
+        if checked:
+            pass
+        else:
+            # Get all possible moves as a list of Squares
+            moves = Referee.moves_as_squares(piece.possible_moves(), board)
 
-        # Remove blocked lines of sights
-        if isinstance(piece, Objects.Pawn):
-            return Referee.Pawn.prune_lines(moves, piece, board)
-        elif isinstance(piece, Objects.Bishop):
-            return Referee.Bishop.prune_lines(moves, piece)
-        elif isinstance(piece, Objects.Rook):
-            return Referee.Rook.prune_lines(moves, piece)
-        elif isinstance(piece, Objects.Queen):
-            return Referee.Queen.prune_lines(moves, piece)
+            # Remove blocked lines of sights
+            if isinstance(piece, Objects.Pawn):
+                return Referee.Pawn.prune_lines(moves, piece, board)
+            elif isinstance(piece, Objects.Bishop):
+                return Referee.Bishop.prune_lines(moves, piece)
+            elif isinstance(piece, Objects.Rook):
+                return Referee.Rook.prune_lines(moves, piece)
+            elif isinstance(piece, Objects.Queen):
+                return Referee.Queen.prune_lines(moves, piece)
 
-        # Remove moves that arrive on a piece of the same team
-        i = 0
-        while i < len(moves):
-            if moves[i].piece is not None and board.colour == moves[i].piece.colour:
-                moves.pop(i)
-                i -= 1
-            i += 1
+            # Remove moves that arrive on a piece of the same team
+            i = 0
+            while i < len(moves):
+                if moves[i].piece is not None and board.colour == moves[i].piece.colour:
+                    moves.pop(i)
+                    i -= 1
+                i += 1
 
-        # TODO Remove moves that result in a check
+            # TODO Remove moves that result in a check
 
         return moves
+
+    def copy_board(board: Objects.Board) -> Objects.Board:
+        return Objects.Board(board.sequence)
 
     # def check_check(board: Objects.Board) -> bool:
     #     """Returns True if the board is in a checked state.
@@ -362,61 +372,42 @@ class Player:
                     break
 
         # Move piece from depart to arrive
-        i_d = event.depart.position.index()
         i_a = event.arrive.position.index()
-        board.board[i_d[0]][i_d[1]].piece = None
+        i_d = event.depart.position.index()
         board.board[i_a[0]][i_a[1]].piece = event.depart.piece
+        board.board[i_d[0]][i_d[1]].piece = None
+
+        board.sequence.add_event(event)
+        board.colour = not board.colour
 
         return board
 
+    def user_turn(board: Objects.Board) -> None:
+        print(board)
+
+        # Current input: depart arrive, e.g. e4 e6
+        input_user = input().split()
+        i_d = Objects.Position(input_user[0], mode=3).index()
+        i_s = Objects.Position(input_user[1], mode=3).index()
+
+        # Restarts turn if move not legal
+        legal_moves = Referee.legal_moves(board.board[i_d[0]][i_d[1]].piece, board)
+        legal_pos = [str(legal_moves[i].position) for i in range(len(legal_moves))]
+        if str(Objects.Position(input_user[1], mode=3)) not in legal_pos:
+            print("Invalid move. Please try another move.")
+            return
+
+        # Move piece across board and change turn
+        event = Objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_s[0]][i_s[1]])
+        Player.move(board, event)
+
+        print(board.sequence)
+
     def play():
-        pass
+        board = Objects.Board(notate=True)
 
-    def turn():
-        pass
-
-
-board = Objects.Board(notate=True)
-print(board)
-for piece in board.active[0]:
-    print(piece, piece.position)
-    for move in Referee.legal_moves(piece, board):
-        print(move.position)
-
-# def move():
-#     """
-#     get user input
-#     confirm it's legal
-#     create Event in Sequence
-#     move on Board
-#     solver/other user's turn
-#     loop
-
-#     """
+        for i in range(5):
+            Player.user_turn(board)
 
 
-# def get_legal_moves(self, possible_moves: list[tuple]):
-#     """This function checks the possible moves and sorts through them and
-#     removes illegal moves. The two criteria it looks for
-#     are:
-#     1. Trying to move a piece to a position not on the board
-#     2. Trying to move a piece onto a square where your team already has a piece
-#     Args:
-#         possible_moves (list of tuples): list of all possible moves a piece can do
-#     Returns:
-#         legal_moves: list of tuples with subset of possible moves that are legal
-#     """
-#     legal_moves = []
-#     for move in possible_moves:
-#         # checking if move is within board
-#         if (
-#             self.position[0] < 8
-#             and self.position[1] < 8
-#             and self.position[0] > 0
-#             and self.position[1] > 0
-#         ):
-#             # Checking if square is already occupied by a piece on your team
-#             for p in pieces:
-#                 if p.colour == self.colour and p.position != move:
-#                     legal_moves.extend(move)
-#     return legal_moves
+Player.play()
