@@ -1,5 +1,6 @@
-# from . import Objects
-import Objects
+from . import Objects
+
+# import Objects
 
 
 class Referee:
@@ -545,14 +546,14 @@ class Player:
             and abs(event.arrive.position.file - event.depart.position.file) == 2
         ):
             board = Player.castle(board, event)
-        # If event is pawn promotion
-        elif (
-            isinstance(event.arrive.piece, Objects.Pawn)
-            and event.arrive.position.rank == 1
-            if board.colour
-            else 8
-        ):
-            board = Player.promote(board, event)
+        # # If event is pawn promotion CHANGING EVERYTHING
+        # elif (
+        #     isinstance(event.arrive.piece, Objects.Pawn)
+        #     and event.arrive.position.rank == 1
+        #     if board.colour
+        #     else 8
+        # ):
+        #     board = Player.promote(board, event)
 
         # Add event to sequence and change active player
         board.sequence.add_event(event)
