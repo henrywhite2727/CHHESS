@@ -1,6 +1,6 @@
 ifeq ($(OS), Windows_NT)
 run:
-	python CHHESS/main.py 
+	python src/main.py 
 
 build: setup.py
 	python setup.py build bdist_wheel
@@ -11,7 +11,7 @@ clean:
 	if exist "./CHHESS.egg-info" rd /s /q CHHESS.egg-info
 else
 run:
-	python3 CHHESS/main.py 
+	python3 src/main.py 
 
 build: setup.py
 	python3 setup.py build bdist_wheel
