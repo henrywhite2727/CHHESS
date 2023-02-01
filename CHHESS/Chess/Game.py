@@ -506,7 +506,20 @@ class Player:
         return board
 
     def promote(board: Objects.Board, event: Objects.Event) -> Objects.Board:
-        pass
+        i_a = event.arrive.position.index()
+        pawn = board.board[i_a[0]][i_a[1]].piece
+        queen = Objects.Queen(event.arrive.position, board.colour)
+        for i in range(len(board.active[1 if board.colour else 0])):
+            if (
+                board.active[1 if board.colour else 0][i].position.file
+                == pawn.position.file
+                and board.active[1 if board.colour else 0][i].position.rank
+                == pawn.position.rank
+            ):
+                board.active[1 if board.colour else 0][i] = queen
+                break
+        board.board[i_a[0]][i_a[1]].piece = queen
+        return board
 
     def move(board: Objects.Board, event: Objects.Event) -> Objects.Board:
         # TODO Implement string interpretation?
