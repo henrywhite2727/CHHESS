@@ -236,15 +236,20 @@ class Bishop(Piece):
 class Rook(Piece):
     value: int = 5
 
-    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+    def __init__(
+        self, position: Position, colour: bool, active: bool = True, moved: bool = False
+    ) -> None:
         """Initializes Rook object.
 
         Args:
             position (Position): Position of piece on board.
             colour (bool): Colour of piece.
-            active (bool, optional): If the piece is on the board. Defaults to True.
+            active (bool, optional): If the piece is on the board. Defaults to
+            True.
+            moved (bool, optional): If the piece has been moved. Defaults to False.
         """
         super().__init__(position, colour, active)
+        self.moved = moved
 
     def __str__(self) -> str:
         """Returns representation of Rook as a string.
@@ -322,15 +327,20 @@ class Queen(Piece):
 class King(Piece):
     value: int = 10
 
-    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+    def __init__(
+        self, position: Position, colour: bool, active: bool = True, moved: bool = False
+    ) -> None:
         """Initializes King object.
 
         Args:
             position (Position): Position of piece on board.
             colour (bool): Colour of piece.
-            active (bool, optional): If the piece is on the board. Defaults to True.
+            active (bool, optional): If the piece is on the board. Defaults to
+            True.
+            moved (bool, optional): If the piece has been moved. Defaults to False.
         """
         super().__init__(position, colour, active)
+        self.moved = moved
 
     def __str__(self) -> str:
         """Returns representation of King as a string.
@@ -356,6 +366,11 @@ class King(Piece):
             ):
                 if file != self.position.file or rank != self.position.rank:
                     moves.append(Position((file, rank), mode=1))
+
+        # If king unmoved, append castle move on either side
+        if not self.moved:
+            moves.append(Position((self.position.file - 2, self.position.rank), mode=1))
+            moves.append(Position((self.position.file + 2, self.position.rank), mode=1))
 
         return moves
 
@@ -500,12 +515,13 @@ class Sequence:
                 and mode == 4
             ):
                 self.sequence = sequence
+                self.moves = len(sequence)
             else:
                 raise ValueError("Invalid game notation standard.")
             self.mode: str = mode
         else:
             self.sequence: list[str] = []
-            self.moves: int = 0
+            self.moves: int = 1
 
             # PGN match data
             self.event: str = ""
@@ -524,11 +540,12 @@ class Sequence:
     def __str__(self):
         string = ""
         for i in range(len(self.sequence)):
-            string += str(i + 1) + ". " + str(self.sequence[i]) + " "
+            string += str(i) + ". " + str(self.sequence[i]) + " "
         return string
 
     def add_event(self, event: Event):
         self.sequence.append(str(event))
+        self.moves += 1
 
 
 class Board:

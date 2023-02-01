@@ -4,3 +4,7 @@ promotion
 draws
 forfeits
 clock?
+
+pytest
+pypi
+sphinx
