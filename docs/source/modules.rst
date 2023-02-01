@@ -4,4 +4,6 @@ CHHESS
 .. toctree::
    :maxdepth: 4
 
-   CHHESS
+   setup
+   src
+   tests

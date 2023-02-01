@@ -1,5 +1,5 @@
-CHHESS package
-==============
+src package
+===========
 
 Subpackages
 -----------
@@ -7,16 +7,16 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   CHHESS.CHHESS
-   CHHESS.tests
+   src.game
+   src.solver
 
 Submodules
 ----------
 
-CHHESS.setup module
--------------------
+src.main module
+---------------
 
-.. automodule:: CHHESS.setup
+.. automodule:: src.main
    :members:
    :undoc-members:
    :show-inheritance:
@@ -24,7 +24,7 @@ CHHESS.setup module
 Module contents
 ---------------
 
-.. automodule:: CHHESS
+.. automodule:: src
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,29 +1,29 @@
-from . import Objects
+from . import objects
 
 # import Objects
 
 
 class Referee:
     def legal_moves(
-        piece: Objects.Piece,
-        board: Objects.Board,
+        piece: objects.Piece,
+        board: objects.Board,
         check_check=False,
-    ) -> list[Objects.Square]:
+    ) -> list[objects.Square]:
         if piece is None or board is None:
             raise ValueError("Invalid piece or board.")
         # Get all possible moves as a list of Squares
         moves = Referee.moves_as_squares(piece.possible_moves(), board)
 
         # Remove blocked lines of sights
-        if isinstance(piece, Objects.Pawn):
+        if isinstance(piece, objects.Pawn):
             moves = Referee.Pawn.prune_lines(moves, piece, board)
-        elif isinstance(piece, Objects.Bishop):
+        elif isinstance(piece, objects.Bishop):
             moves = Referee.Bishop.prune_lines(moves, piece)
-        elif isinstance(piece, Objects.Rook):
+        elif isinstance(piece, objects.Rook):
             moves = Referee.Rook.prune_lines(moves, piece)
-        elif isinstance(piece, Objects.Queen):
+        elif isinstance(piece, objects.Queen):
             moves = Referee.Queen.prune_lines(moves, piece)
-        elif isinstance(piece, Objects.King):
+        elif isinstance(piece, objects.King):
             moves = Referee.King.prune_lines(moves, piece, board)
 
         # Remove moves that arrive on a piece of the same team
@@ -43,7 +43,7 @@ class Referee:
 
                 Player.move(
                     board_copy,
-                    Objects.Event(
+                    objects.Event(
                         board_copy.board[i_d[0]][i_d[1]],
                         board_copy.board[i_a[0]][i_a[1]],
                     ),
@@ -55,7 +55,7 @@ class Referee:
 
         return moves
 
-    def check_check(board: Objects.Board) -> bool:
+    def check_check(board: objects.Board) -> bool:
         """Returns True if the board is in a checked state.
 
         Args:
@@ -67,13 +67,13 @@ class Referee:
         # Check every one of opponent's legal moves for King
         for piece in board.active[1 if board.colour else 0]:
             for move in Referee.legal_moves(piece, board, check_check=True):
-                if isinstance(move.piece, Objects.King) and (
+                if isinstance(move.piece, objects.King) and (
                     (move.piece.colour is not board.colour)
                 ):
                     return True
         return False
 
-    def check_mate(board: Objects.Board) -> bool:
+    def check_mate(board: objects.Board) -> bool:
         """Returns True if the board is in a checkmate state.
 
         Args:
@@ -88,8 +88,8 @@ class Referee:
         return True
 
     def moves_as_squares(
-        moves: list[Objects.Position], board: Objects.Board
-    ) -> list[Objects.Square]:
+        moves: list[objects.Position], board: objects.Board
+    ) -> list[objects.Square]:
         """Returns a list of Position objects as a list of corresponding Square
         objects, given a Board object.
 
@@ -105,16 +105,16 @@ class Referee:
             moves_squares.append(board.board[move.index()[0]][move.index()[1]])
         return moves_squares
 
-    def copy_board(board: Objects.Board) -> Objects.Board:
-        board_copy = Objects.Board()
+    def copy_board(board: objects.Board) -> objects.Board:
+        board_copy = objects.Board()
 
         for event in board.sequence.sequence:
             split = event.split()
-            i_d = Objects.Position(split[0], mode=3).index()
-            i_a = Objects.Position(split[1], mode=3).index()
+            i_d = objects.Position(split[0], mode=3).index()
+            i_a = objects.Position(split[1], mode=3).index()
             Player.move(
                 board_copy,
-                Objects.Event(
+                objects.Event(
                     board_copy.board[i_d[0]][i_d[1]], board_copy.board[i_a[0]][i_a[1]]
                 ),
             )
@@ -124,8 +124,8 @@ class Referee:
     class Pawn:
         # TODO This method only needs board for the most recent move for en passant
         def prune_lines(
-            moves: list[Objects.Square], pawn: Objects.Pawn, board: Objects.Board
-        ) -> list[Objects.Square]:
+            moves: list[objects.Square], pawn: objects.Pawn, board: objects.Board
+        ) -> list[objects.Square]:
             """Prunes blocked lines of sight within the passed set of moves for
             this piece.
 
@@ -177,7 +177,7 @@ class Referee:
 
             return moves
 
-        def en_passant(pawn: Objects.Pawn, board: Objects.Board, left: bool) -> bool:
+        def en_passant(pawn: objects.Pawn, board: objects.Board, left: bool) -> bool:
             """Returns whether or not argument pawn is able to perform a capture en passant.
 
             Args:
@@ -190,14 +190,14 @@ class Referee:
             """
             if len(board.sequence.sequence) == 0:
                 return False
-            i_last = Objects.Position(
+            i_last = objects.Position(
                 board.sequence.sequence[-1].split()[1], mode=3
             ).index()
             p_last = board.board[i_last[0]][i_last[1]]
             if (
                 (pawn.colour and pawn.position.rank != 4)
                 or (not pawn.colour and pawn.position.rank != 5)
-                or not isinstance(p_last, Objects.Pawn)
+                or not isinstance(p_last, objects.Pawn)
                 or p_last.position.file != pawn.position.file + (-1 if left else -1)
                 or p_last.position.rank != (4 if pawn.colour else 5)
             ):
@@ -206,8 +206,8 @@ class Referee:
 
     class Bishop:
         def prune_lines(
-            moves: list[Objects.Square], bishop: Objects.Bishop
-        ) -> list[Objects.Square]:
+            moves: list[objects.Square], bishop: objects.Bishop
+        ) -> list[objects.Square]:
             """Prunes blocked lines of sight within the passed set of moves for
             this piece.
 
@@ -239,12 +239,12 @@ class Referee:
             return moves
 
         def prune_line(
-            moves: list[Objects.Square],
-            bishop: Objects.Bishop,
+            moves: list[objects.Square],
+            bishop: objects.Bishop,
             sight: int,
             up: bool,
             right: bool,
-        ) -> list[Objects.Square]:
+        ) -> list[objects.Square]:
             """Prunes one line of sight within the passed set of moves for this piece.
 
             Args:
@@ -287,8 +287,8 @@ class Referee:
 
     class Rook:
         def prune_lines(
-            moves: list[Objects.Square], rook: Objects.Rook
-        ) -> list[Objects.Square]:
+            moves: list[objects.Square], rook: objects.Rook
+        ) -> list[objects.Square]:
             """Prunes blocked lines of sight within the passed set of moves for
             this piece.
 
@@ -312,12 +312,12 @@ class Referee:
             return moves
 
         def prune_line(
-            moves: list[Objects.Square],
-            rook: Objects.Rook,
+            moves: list[objects.Square],
+            rook: objects.Rook,
             sight: int,
             increasing: bool,
             along_files: bool,
-        ) -> list[Objects.Square]:
+        ) -> list[objects.Square]:
             """Prunes one line of sight within the passed set of moves for this piece.
 
             Args:
@@ -358,8 +358,8 @@ class Referee:
 
     class Queen:
         def prune_lines(
-            moves: list[Objects.Square], queen: Objects.Queen
-        ) -> list[Objects.Square]:
+            moves: list[objects.Square], queen: objects.Queen
+        ) -> list[objects.Square]:
             """Prunes blocked lines of sight within the passed set of moves for
             this piece.
 
@@ -398,8 +398,8 @@ class Referee:
 
     class King:
         def prune_lines(
-            moves: list[Objects.Square], king: Objects.King, board: Objects.Board
-        ) -> list[Objects.Square]:
+            moves: list[objects.Square], king: objects.King, board: objects.Board
+        ) -> list[objects.Square]:
             """Prunes blocked lines of sight (in the context of castling) within
             the passed set of moves for this piece.
 
@@ -416,14 +416,14 @@ class Referee:
 
             if not king.moved:
                 if board.board[i_l[0]][i_l[1]].piece is not None and isinstance(
-                    board.board[i_l[0]][i_l[1]].piece, Objects.Rook
+                    board.board[i_l[0]][i_l[1]].piece, objects.Rook
                 ):
                     moves = Referee.King.prune_line(moves, king, False, False)
                 else:
                     moves = Referee.King.prune_line(moves, king, False, True)
 
                 if board.board[i_r[0]][i_r[1]].piece is not None and isinstance(
-                    board.board[i_r[0]][i_r[1]].piece, Objects.Rook
+                    board.board[i_r[0]][i_r[1]].piece, objects.Rook
                 ):
                     moves = Referee.King.prune_line(moves, king, True, False)
                 else:
@@ -432,12 +432,12 @@ class Referee:
             return moves
 
         def prune_line(
-            moves: list[Objects.Square],
-            king: Objects.King,
-            board: Objects.Board,
+            moves: list[objects.Square],
+            king: objects.King,
+            board: objects.Board,
             increasing: bool,
             prune: bool = False,
-        ) -> list[Objects.Square]:
+        ) -> list[objects.Square]:
             """Prunes one line of sight within the passed set of moves for this piece.
 
             Args:
@@ -476,7 +476,7 @@ class Referee:
 
                             Player.move(
                                 board_copy,
-                                Objects.Event(
+                                objects.Event(
                                     board_copy.board[j_d[0]][j_d[1]],
                                     board_copy.board[j_a[0]][j_a[1]],
                                 ),
@@ -495,7 +495,7 @@ class Referee:
 
 
 class Player:
-    def castle(board: Objects.Board, event: Objects.Event) -> Objects.Board:
+    def castle(board: objects.Board, event: objects.Event) -> objects.Board:
         increasing = event.arrive.position.file - event.depart.position.file < 0
         i_r = (event.depart.position.rank - 1, 0 if increasing else 7)
         i_ra = (i_r[0], i_r[1] + (-2 if increasing else 3))
@@ -506,10 +506,10 @@ class Player:
         board.board[i_r[0]][i_r[1]].piece = None
         return board
 
-    def promote(board: Objects.Board, event: Objects.Event) -> Objects.Board:
+    def promote(board: objects.Board, event: objects.Event) -> objects.Board:
         i_a = event.arrive.position.index()
         pawn = board.board[i_a[0]][i_a[1]].piece
-        queen = Objects.Queen(event.arrive.position, board.colour)
+        queen = objects.Queen(event.arrive.position, board.colour)
         for i in range(len(board.active[1 if board.colour else 0])):
             if (
                 board.active[1 if board.colour else 0][i].position.file
@@ -522,7 +522,7 @@ class Player:
         board.board[i_a[0]][i_a[1]].piece = queen
         return board
 
-    def move(board: Objects.Board, event: Objects.Event) -> Objects.Board:
+    def move(board: objects.Board, event: objects.Event) -> objects.Board:
         # TODO Implement string interpretation?
 
         # Assume legal moves by the power of Game
@@ -542,7 +542,7 @@ class Player:
 
         # If event is castle
         if (
-            isinstance(event.arrive.piece, Objects.King)
+            isinstance(event.arrive.piece, objects.King)
             and abs(event.arrive.position.file - event.depart.position.file) == 2
         ):
             board = Player.castle(board, event)
@@ -561,7 +561,7 @@ class Player:
 
         return board
 
-    def user_turn(board: Objects.Board) -> bool:
+    def user_turn(board: objects.Board) -> bool:
         print(board)
 
         # Ends game if board in mate state
@@ -578,8 +578,8 @@ class Player:
             + ") "
         )
         input_user = input().split()
-        i_d = Objects.Position(input_user[0], mode=3).index()
-        i_a = Objects.Position(input_user[1], mode=3).index()
+        i_d = objects.Position(input_user[0], mode=3).index()
+        i_a = objects.Position(input_user[1], mode=3).index()
 
         # Restarts turn if move not legal
         if board.board[i_d[0]][i_d[1]].piece is None:
@@ -587,7 +587,7 @@ class Player:
             return True
         legal_moves = Referee.legal_moves(board.board[i_d[0]][i_d[1]].piece, board)
         legal_pos = [str(legal_moves[i].position) for i in range(len(legal_moves))]
-        if str(Objects.Position(input_user[1], mode=3)) not in legal_pos:
+        if str(objects.Position(input_user[1], mode=3)) not in legal_pos:
             if Referee.check_check(board):
                 print("King is in check.")
             else:
@@ -595,28 +595,25 @@ class Player:
             return True
 
         # Move piece across board and change turn
-        event = Objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]])
+        event = objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]])
         board = Player.move(board, event)
 
         return True
 
     def play():
-        board = Objects.Board(notate=True)
+        board = objects.Board(notate=True)
 
         # Auto play six moves
         events = ["e2 e4", "b8 b6", "f1 c4", "b6 b8", "d1 f4", "b8 b6"]
         for event in events:
             split = event.split()
-            i_d = Objects.Position(split[0], mode=3).index()
-            i_a = Objects.Position(split[1], mode=3).index()
+            i_d = objects.Position(split[0], mode=3).index()
+            i_a = objects.Position(split[1], mode=3).index()
             Player.move(
                 board,
-                Objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]]),
+                objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]]),
             )
 
         game_active = True
         while game_active:
             game_active = Player.user_turn(board)
-
-
-Player.play()
