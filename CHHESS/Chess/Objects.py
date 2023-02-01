@@ -405,9 +405,7 @@ class Event:
         # Assume legal moves by the power of Referee
         self.depart: Square = depart
         self.arrive: Square = arrive
-        self.capture: bool = False
-        if self.arrive.piece is not None:
-            self.capture = True
+        self.capture: bool = self.arrive.piece is not None
         self.disam: int = disam
         if self.disam not in (0, 1, 2, 3):
             raise ValueError("Invalid disambiguation mode " + str(self.disam) + ".")

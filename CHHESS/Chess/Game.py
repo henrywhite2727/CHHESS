@@ -37,16 +37,13 @@ class Referee:
             while i < len(moves):
                 board_copy = Referee.copy_board(board)
                 i_d, i_a = piece.position.index(), moves[i].position.index()
+
                 Player.move(
                     board_copy,
                     Objects.Event(
                         board_copy.board[i_d[0]][i_d[1]],
                         board_copy.board[i_a[0]][i_a[1]],
                     ),
-                )
-                print(
-                    board_copy.board[i_d[0]][i_d[1]].position,
-                    board_copy.board[i_a[0]][i_a[1]].position,
                 )
                 if Referee.check_check(board_copy):
                     moves.pop(i)
@@ -65,13 +62,10 @@ class Referee:
             bool: Whether or not the current player is in check.
         """
         # Check every one of opponent's legal moves for King
-        for piece in board.active[0 if board.colour else 1]:
-            print("checking", piece, piece.position)
+        for piece in board.active[1 if board.colour else 0]:
             for move in Referee.legal_moves(piece, board, check_check=True):
-                if isinstance(move.piece, Objects.King):
-                    print("found", piece, piece.position, move.piece.position)
                 if isinstance(move.piece, Objects.King) and (
-                    (move.piece.colour == board.colour)
+                    (move.piece.colour is not board.colour)
                 ):
                     return True
         return False
@@ -376,7 +370,7 @@ class Referee:
                     blocked lines of sight pruned.
             """
             file_p, rank_p = queen.position.file, queen.position.rank
-            left, right, up, down = 8 - file_p, file_p - 1, rank_p - 1, 8 - rank_p
+            left, right, up, down = file_p - 1, 8 - file_p, 8 - rank_p, rank_p - 1
 
             # Clean diagonal lines of sight
             moves = Referee.Bishop.prune_line(
@@ -411,8 +405,7 @@ class Player:
             i_c = 0 if board.colour else 1
             for i in range(len(board.active[i_c])):
                 if str(board.active[i_c][i].position) == str(event.arrive.position):
-                    board.active[i_c].pop(i)
-                    board.captured[i_c].append(i)
+                    board.captured[i_c].append(board.active[i_c].pop(i))
                     break
 
         # Move piece from depart to arrive
@@ -422,6 +415,7 @@ class Player:
         board.board[i_d[0]][i_d[1]].piece = None
 
         board.sequence.add_event(event)
+        board.colour = not board.colour
 
         return board
 
@@ -442,26 +436,21 @@ class Player:
         legal_moves = Referee.legal_moves(board.board[i_d[0]][i_d[1]].piece, board)
         legal_pos = [str(legal_moves[i].position) for i in range(len(legal_moves))]
         if str(Objects.Position(input_user[1], mode=3)) not in legal_pos:
-            print("Invalid move. Please try another move.")
+            if Referee.check_check(board):
+                print("King is in check.")
+            else:
+                print("Invalid move. Please try another move.")
             return True
 
         # Move piece across board and change turn
         event = Objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]])
         board = Player.move(board, event)
-        board.colour = not board.colour
+
+        return True
 
     def play():
         board = Objects.Board(notate=True)
-        events = [
-            "e2 e4",
-            "d7 d5",
-            "e4 d5",
-            "d8 d5",
-            "d2 d4",
-            "d5 d4",
-            "f2 f4",
-            "c8 g4",
-        ]
+        events = ["e2 e4", "b8 b6", "f1 c4", "b6 b8", "d1 f4", "b8 b6"]
         for event in events:
             split = event.split()
             i_d = Objects.Position(split[0], mode=3).index()
@@ -471,23 +460,9 @@ class Player:
                 Objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]]),
             )
 
-        for piece in board.active[0]:
-            print(
-                piece,
-                [str(move.position) for move in Referee.legal_moves(piece, board)],
-            )
-
-        # for i in range(10):
-        #     if not Player.user_turn(board):
-        #         break
-        #     for piece in board.active[0]:
-        #         if isinstance(piece, Objects.King):
-        #             print(
-        #                 [
-        #                     str(move.position)
-        #                     for move in Referee.legal_moves(piece, board)
-        #                 ]
-        #             )
+        game_active = True
+        while game_active:
+            game_active = Player.user_turn(board)
 
 
 Player.play()
