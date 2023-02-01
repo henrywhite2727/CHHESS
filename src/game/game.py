@@ -1,6 +1,6 @@
-from . import objects
+# from . import objects
 
-# import Objects
+import objects
 
 
 class Referee:
