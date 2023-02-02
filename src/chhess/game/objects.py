@@ -1,4 +1,5 @@
-# TODO write __repr__ for every class
+# TODO write __repr__, __add__ for every class
+# __name__ == main?
 from typing import Union
 
 
@@ -71,10 +72,13 @@ class Position:
 
 
 class Piece:
-    def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
+    def __init__(
+        self, position: Position, colour: bool, active: bool = True, value: int = 0
+    ) -> None:
         self.position: Position = position
         self.colour: bool = colour
         self.active: bool = active
+        self.value: int = value
 
     def __str__(self) -> str:
         return NotImplementedError(
@@ -86,10 +90,11 @@ class Piece:
             "This Piece's class possible_moves has not been implemented"
         )
 
+    def __gt__(self) -> bool:
+        pass
+
 
 class Pawn(Piece):
-    value: int = 1
-
     def __init__(self, position: Position, colour: bool, active: bool = True) -> None:
         """Initializes Pawn object.
 
@@ -98,7 +103,7 @@ class Pawn(Piece):
             colour (bool): Colour of piece.
             active (bool, optional): If the piece is on the board. Defaults to True.
         """
-        super().__init__(position, colour, active)
+        super().__init__(position, colour, active, value=1)
 
     def __str__(self) -> str:
         """Returns representation of Pawn as a string.
@@ -521,7 +526,7 @@ class Sequence:
             self.mode: str = mode
         else:
             self.sequence: list[str] = []
-            self.moves: int = 1
+            self.moves: int = 0
 
             # PGN match data
             self.event: str = ""
@@ -540,7 +545,9 @@ class Sequence:
     def __str__(self):
         string = ""
         for i in range(len(self.sequence)):
-            string += str(i) + ". " + str(self.sequence[i]) + " "
+            if i % 3 == 0 and i > 0:
+                string += "\n"
+            string += str(i + 1) + ". " + str(self.sequence[i]) + "  "
         return string
 
     def add_event(self, event: Event):
@@ -609,7 +616,11 @@ class Board:
             self.board[rank][4].piece = self.active[i_c][-1]
 
     def __str__(self) -> str:
-        string = ""
+        string = (
+            "============================\n"
+            + str(self.sequence)
+            + "\n============================\n\n"
+        )
         if self.colour:
             if self.notate:
                 string += "  h g f e d c b a\n"
@@ -622,7 +633,7 @@ class Board:
                 if self.notate:
                     string += str(i + 1)
                 string += "\n"
-            string += " ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾"
+            string += " ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n"
 
         else:
             if self.notate:
@@ -639,5 +650,5 @@ class Board:
                 string += "  "
             string += " ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾"
             if self.notate:
-                string += "\n    a b c d e f g h"
+                string += "\n    a b c d e f g h\n"
         return string

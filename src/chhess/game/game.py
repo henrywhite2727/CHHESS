@@ -1,6 +1,8 @@
-# from . import objects
+from os import system, name
 
-import objects
+from . import objects
+
+# import objects
 
 
 class Referee:
@@ -493,6 +495,12 @@ class Referee:
 
             return moves
 
+    def clear_screen() -> None:
+        if name == "nt":
+            _ = system("cls")
+        else:
+            _ = system("clear")
+
 
 class Player:
     def castle(board: objects.Board, event: objects.Event) -> objects.Board:
@@ -548,7 +556,7 @@ class Player:
             board = Player.castle(board, event)
         # # If event is pawn promotion CHANGING EVERYTHING
         # elif (
-        #     isinstance(event.arrive.piece, Objects.Pawn)
+        #     isinstance(event.arrive.piece, objects.Pawn)
         #     and event.arrive.position.rank == 1
         #     if board.colour
         #     else 8
@@ -562,6 +570,7 @@ class Player:
         return board
 
     def user_turn(board: objects.Board) -> bool:
+        Referee.clear_screen()
         print(board)
 
         # Ends game if board in mate state
@@ -603,16 +612,16 @@ class Player:
     def play():
         board = objects.Board(notate=True)
 
-        # Auto play six moves
-        events = ["e2 e4", "b8 b6", "f1 c4", "b6 b8", "d1 f4", "b8 b6"]
-        for event in events:
-            split = event.split()
-            i_d = objects.Position(split[0], mode=3).index()
-            i_a = objects.Position(split[1], mode=3).index()
-            Player.move(
-                board,
-                objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]]),
-            )
+        # # Auto play six moves
+        # events = ["e2 e4", "b8 b6", "f1 c4", "b6 b8", "d1 f4", "b8 b6"]
+        # for event in events:
+        #     split = event.split()
+        #     i_d = objects.Position(split[0], mode=3).index()
+        #     i_a = objects.Position(split[1], mode=3).index()
+        #     Player.move(
+        #         board,
+        #         objects.Event(board.board[i_d[0]][i_d[1]], board.board[i_a[0]][i_a[1]]),
+        #     )
 
         game_active = True
         while game_active:
